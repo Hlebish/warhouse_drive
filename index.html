@@ -18,9 +18,9 @@
 <div class="pill">● Данные хранятся на этом устройстве</div>
 </header>
 <section class="panel settings">
-<h2>Откуда выезжает водитель</h2>
-<div class="settings-grid"><label class="field" style="margin:0"><span>Адрес склада</span><input id="warehouse" placeholder="Город, улица, номер дома"></label><button class="btn" id="saveWarehouse">Сохранить</button></div>
-<p class="notice">Адрес склада сохраняется локально. Для сортировки по дорожному расстоянию сайт использует публичные сервисы OpenStreetMap/OSRM: при оптимизации адреса передаются этим сервисам. Сами маршруты остаются в браузере.</p>
+<h2>Место выезда водителя</h2>
+<p style="margin:0 0 8px;font-weight:800">Днепр, Богдана Хмельницкого 208Б</p>
+<p class="notice">Место выезда фиксировано и не редактируется. Для сортировки по дорожному расстоянию сайт использует публичные сервисы OpenStreetMap/OSRM: адреса передаются этим сервисам. Сами маршруты остаются в браузере.</p>
 </section>
 <div class="layout">
 <section class="panel entry-panel">
@@ -50,28 +50,30 @@
 <script>
 (()=> {
 const $=id=>document.getElementById(id);
-const KEY='warehouse_drive_routes_v1', WH='warehouse_drive_warehouse_v1';
+const KEY='warehouse_drive_routes_v1';
+const WAREHOUSE_ADDRESS='Днепр, Богдана Хмельницкого 208Б';
 let stops=[], editId=null;
 try{stops=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(stops))stops=[]}catch{stops=[]}
-$('warehouse').value=localStorage.getItem(WH)||'';
+
 const persist=()=>localStorage.setItem(KEY,JSON.stringify(stops));
 const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const render=()=>{
  $('count').textContent=stops.length+' '+(stops.length===1?'остановка':stops.length>=2&&stops.length<=4?'остановки':'остановок');
  $('stops').innerHTML=stops.length?stops.map((s,i)=>'<article class="stop"><div class="num">'+(i+1)+'</div><div><h3>'+escapeHtml(s.client)+'</h3><div class="addr">'+escapeHtml(s.address)+'</div><div class="meta">'+(s.time?'<span class="tag">🕒 '+escapeHtml(s.time)+'</span>':'')+(s.note?'<span class="tag">'+escapeHtml(s.note)+'</span>':'')+'</div></div><div class="stop-actions"><button class="mini" title="Выше" data-act="up" data-id="'+s.id+'">↑</button><button class="mini" title="Ниже" data-act="down" data-id="'+s.id+'">↓</button><button class="mini" title="Редактировать" data-act="edit" data-id="'+s.id+'">✎</button><button class="mini danger" title="Удалить" data-act="delete" data-id="'+s.id+'">×</button></div></article>').join(''):'<div class="empty"><strong>Пока нет остановок</strong>Добавь первого клиента слева — он появится здесь.</div>';
  $('printDate').textContent='Дата: '+new Date().toLocaleDateString('ru-RU');
- $('printWarehouse').textContent='Склад: '+($('warehouse').value.trim()||'не указан');
+ $('printWarehouse').textContent='Место выезда: '+WAREHOUSE_ADDRESS;
 };
 function resetForm(){editId=null;$('stopForm').reset();$('editId').value='';$('formTitle').textContent='Добавить остановку';$('submitBtn').textContent='Добавить клиента';$('cancelEdit').classList.add('hidden')}
 $('stopForm').addEventListener('submit',e=>{e.preventDefault();const item={id:editId||crypto.randomUUID(),client:$('client').value.trim(),address:$('address').value.trim(),time:$('time').value,note:$('note').value.trim()};if(!item.client||!item.address)return;if(editId){stops=stops.map(s=>s.id===editId?item:s)}else stops.push(item);persist();render();resetForm();$('formStatus').textContent='Сохранено на этом устройстве.'});
 $('cancelEdit').addEventListener('click',resetForm);
 $('stops').addEventListener('click',e=>{const b=e.target.closest('button[data-act]');if(!b)return;const i=stops.findIndex(s=>s.id===b.dataset.id);if(i<0)return;switch(b.dataset.act){case'edit':{const s=stops[i];editId=s.id;$('client').value=s.client;$('address').value=s.address;$('time').value=s.time||'';$('note').value=s.note||'';$('formTitle').textContent='Редактировать остановку';$('submitBtn').textContent='Сохранить изменения';$('cancelEdit').classList.remove('hidden');$('client').focus();break}case'delete':if(confirm('Удалить клиента «'+stops[i].client+'»?')){stops.splice(i,1);persist();render()}break;case'up':if(i>0){[stops[i-1],stops[i]]=[stops[i],stops[i-1]];persist();render()}break;case'down':if(i<stops.length-1){[stops[i+1],stops[i]]=[stops[i],stops[i+1]];persist();render()}break}});
-$('saveWarehouse').addEventListener('click',()=>{localStorage.setItem(WH,$('warehouse').value.trim());render();$('routeStatus').textContent='Адрес склада сохранён.'});
+
 $('sortTime').addEventListener('click',()=>{stops.sort((a,b)=>{if(!a.time)return 1;if(!b.time)return -1;return a.time.localeCompare(b.time)});persist();render();$('routeStatus').textContent='Остановки отсортированы по времени.'});
-const geocode=async q=>{const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=ua&q='+encodeURIComponent(q);const r=await fetch(url,{headers:{'Accept-Language':'ru'}});if(!r.ok)throw Error('Сервис поиска адресов временно недоступен.');const d=await r.json();if(!d.length)throw Error('Карта не нашла адрес «'+q+'». Уточни город, улицу и номер дома.');return {coords:[Number(d[0].lon),Number(d[0].lat)],label:d[0].display_name||q}};\n$('checkAddress').addEventListener('click',async()=>{const q=$('address').value.trim();if(!q){$('addressStatus').textContent='Сначала введи адрес доставки.';$('address').focus();return}const b=$('checkAddress');b.disabled=true;$('addressStatus').textContent='Ищу адрес на карте…';try{const found=await geocode(q);$('addressStatus').textContent='✓ Адрес найден: '+found.label+' Если это нужное место, можно добавлять клиента.'}catch(err){$('addressStatus').textContent='✕ '+err.message}finally{b.disabled=false}});
+const geocode=async q=>{const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=ua&q='+encodeURIComponent(q);const r=await fetch(url,{headers:{'Accept-Language':'ru'}});if(!r.ok)throw Error('Сервис поиска адресов временно недоступен.');const d=await r.json();if(!d.length)throw Error('Карта не нашла адрес «'+q+'». Уточни город, улицу и номер дома.');return {coords:[Number(d[0].lon),Number(d[0].lat)],label:d[0].display_name||q}};
+$('checkAddress').addEventListener('click',async()=>{const q=$('address').value.trim();if(!q){$('addressStatus').textContent='Сначала введи адрес доставки.';$('address').focus();return}const b=$('checkAddress');b.disabled=true;$('addressStatus').textContent='Ищу адрес на карте…';try{const found=await geocode(q);$('addressStatus').textContent='✓ Адрес найден: '+found.label+' Если это нужное место, можно добавлять клиента.'}catch(err){$('addressStatus').textContent='✕ '+err.message}finally{b.disabled=false}});
 $('optimize').addEventListener('click',async()=>{
  if(stops.length<2){$('routeStatus').textContent='Добавь минимум двух клиентов для оптимизации.';return}
- const warehouse=$('warehouse').value.trim();if(!warehouse){$('routeStatus').textContent='Сначала укажи адрес склада.';$('warehouse').focus();return}
+ const warehouse=WAREHOUSE_ADDRESS;
  const btn=$('optimize');btn.disabled=true;$('routeStatus').textContent='Определяю координаты адресов… Это может занять немного времени.';
  try{
   const queries=[warehouse,...stops.map(s=>s.address)], coords=[];
@@ -90,9 +92,9 @@ $('optimize').addEventListener('click',async()=>{
  finally{btn.disabled=false}
 });
 $('print').addEventListener('click',()=>{render();window.print()});
-$('export').addEventListener('click',()=>{const data={version:1,exportedAt:new Date().toISOString(),warehouse:$('warehouse').value.trim(),stops};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='warehouse-drive-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url)});
+$('export').addEventListener('click',()=>{const data={version:1,exportedAt:new Date().toISOString(),warehouse:WAREHOUSE_ADDRESS,stops};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='warehouse-drive-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url)});
 $('importBtn').addEventListener('click',()=>$('importFile').click());
-$('importFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());const incoming=Array.isArray(data)?data:data.stops;if(!Array.isArray(incoming))throw Error('В файле не найден список остановок.');if(!confirm('Импорт заменит текущий список остановок. Продолжить?'))return;stops=incoming.map(s=>({id:String(s.id||crypto.randomUUID()),client:String(s.client||''),address:String(s.address||''),time:String(s.time||''),note:String(s.note||'')})).filter(s=>s.client&&s.address);if(data.warehouse){$('warehouse').value=String(data.warehouse);localStorage.setItem(WH,String(data.warehouse))}persist();render();$('routeStatus').textContent='Импорт завершён. Загружено остановок: '+stops.length}catch(err){alert('Не удалось импортировать файл: '+err.message)}finally{e.target.value=''}});
+$('importFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());const incoming=Array.isArray(data)?data:data.stops;if(!Array.isArray(incoming))throw Error('В файле не найден список остановок.');if(!confirm('Импорт заменит текущий список остановок. Продолжить?'))return;stops=incoming.map(s=>({id:String(s.id||crypto.randomUUID()),client:String(s.client||''),address:String(s.address||''),time:String(s.time||''),note:String(s.note||'')})).filter(s=>s.client&&s.address);persist();render();$('routeStatus').textContent='Импорт завершён. Загружено остановок: '+stops.length}catch(err){alert('Не удалось импортировать файл: '+err.message)}finally{e.target.value=''}});
 render();
 })();
 </script>
