@@ -75,7 +75,7 @@ body.pin-locked .wrap{visibility:hidden;pointer-events:none;user-select:none}
    <button class="btn primary" type="submit" id="pinSubmit">Открыть справочник</button>
    <p class="pin-message" id="pinMessage" aria-live="polite"></p>
   </form>
-  <p class="pin-note">PIN защищает от случайного доступа на этом устройстве. Это не полноценная серверная авторизация.</p>
+  <p class="pin-note">PIN проверяется на сервере. Данные загружаются только после успешного входа.</p>
  </div>
 </section>
 <main class="wrap">
@@ -220,7 +220,7 @@ function unlock(){document.body.classList.remove('pin-locked');document.querySel
 function lock(){document.body.classList.add('pin-locked');document.querySelector('.wrap').setAttribute('inert','');$('pinOverlay').classList.remove('hidden');$('pinInput').value='';$('pinConfirm').value='';clients=[];clientNotes={};paint();cloudAuth.signOut().catch(()=>{});showPinMode();$('pinInput').focus()}
 $('pinForm').addEventListener('submit',async e=>{
  e.preventDefault();const pin=$('pinInput').value,msg=$('pinMessage');
- if(!/^\\d{4,8}$/.test(pin)){msg.textContent='Нужно ввести от 4 до 8 цифр.';return}
+ if(!/^\d{4,8}$/.test(pin)){msg.textContent='Нужно ввести от 4 до 8 цифр.';return}
  const submit=$('pinSubmit');submit.disabled=true;submit.textContent='Проверяем PIN…';msg.textContent='';
  try{
   await cloudAuth.signOut();
@@ -235,8 +235,8 @@ $('pinForm').addEventListener('submit',async e=>{
   $('pinInput').value='';$('pinInput').focus();
  }finally{submit.disabled=false;submit.textContent='Открыть справочник'}
 });
-$('pinInput').addEventListener('input',()=>{$('pinInput').value=$('pinInput').value.replace(/\\D/g,'').slice(0,8)});
-$('pinConfirm').addEventListener('input',()=>{$('pinConfirm').value=$('pinConfirm').value.replace(/\\D/g,'').slice(0,8)});
+$('pinInput').addEventListener('input',()=>{$('pinInput').value=$('pinInput').value.replace(/\D/g,'').slice(0,8)});
+$('pinConfirm').addEventListener('input',()=>{$('pinConfirm').value=$('pinConfirm').value.replace(/\D/g,'').slice(0,8)});
 $('lockSite').addEventListener('click',lock);
 $('clientSearch').addEventListener('input',paint);
 $('clientSearch').addEventListener('focus',()=>{if(norm($('clientSearch').value))paint()});
