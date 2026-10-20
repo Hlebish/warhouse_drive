@@ -65,17 +65,19 @@ body.pin-locked .wrap{visibility:hidden;pointer-events:none;user-select:none}
 <body class="pin-locked">
 <section class="pin-overlay" id="pinOverlay" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
  <div class="pin-box">
-  <div class="eyebrow">Warehouse Drive · доступ ограничен</div>
-  <h2 id="pinTitle">Введите PIN-код</h2>
-  <p id="pinDescription">PIN-код нужен, чтобы открыть справочник клиентов.</p>
+  <div class="eyebrow">Warehouse Drive · защищённый вход</div>
+  <h2 id="pinTitle">Вход в справочник</h2>
+  <p id="pinDescription">Войди с учётной записью, которую заранее создали в Firebase.</p>
   <form id="pinForm">
-   <label for="pinInput" id="pinInputLabel">PIN-код</label>
-   <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" maxlength="8" minlength="4" required placeholder="••••" aria-describedby="pinMessage">
-   <div id="pinConfirmWrap" class="hidden"><label for="pinConfirm">Повтори PIN-код</label><input id="pinConfirm" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" minlength="4" autocomplete="new-password" placeholder="••••"></div>
-   <button class="btn primary" type="submit" id="pinSubmit">Открыть справочник</button>
+   <label for="pinInput">Электронная почта</label>
+   <input id="pinInput" type="email" autocomplete="username" maxlength="254" required placeholder="name@example.com" aria-describedby="pinMessage" style="letter-spacing:normal;text-align:left;font-size:19px">
+   <label for="passwordInput">Пароль</label>
+   <input id="passwordInput" type="password" autocomplete="current-password" minlength="6" required placeholder="Пароль Firebase" style="letter-spacing:normal;text-align:left;font-size:19px">
+   <button class="btn primary" type="submit" id="pinSubmit">Войти</button>
+   <button class="btn" type="button" id="resetPassword">Забыли пароль?</button>
    <p class="pin-message" id="pinMessage" aria-live="polite"></p>
   </form>
-  <p class="pin-note">PIN проверяется на сервере. Данные загружаются только после успешного входа.</p>
+  <p class="pin-note">Доступ разрешён только заранее добавленным адресам электронной почты. Пароль не хранится в коде сайта.</p>
  </div>
 </section>
 <main class="wrap">
@@ -112,13 +114,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const cloudAuth = firebase.auth();
 const cloudDb = firebase.firestore();
-const cloudFunctions = firebase.app().functions("europe-west1");
 
 (()=> {
 const $=id=>document.getElementById(id);
 const CLIENT_KEY='warehouse_drive_clients_v1';
-const PIN_KEY='warehouse_drive_pin_v1';
-const PIN_ATTEMPTS_KEY='warehouse_drive_pin_attempts_v1';
 const NOTES_KEY='warehouse_drive_client_notes_v1';
 let clientNotes={};
 let clients=[];
@@ -208,35 +207,35 @@ function paint(){
  suggestions.hidden=!top.length;
 }
 function showPinMode(){
- $('pinTitle').textContent='Введите PIN-код';
- $('pinDescription').textContent='Введи общий PIN-код, чтобы открыть облачный справочник.';
- $('pinInputLabel').textContent='PIN-код';
- $('pinConfirmWrap').classList.add('hidden');
- $('pinConfirm').required=false;
- $('pinSubmit').textContent='Открыть справочник';
+ $('pinTitle').textContent='Вход в справочник';
+ $('pinDescription').textContent='Введи свою учётную запись Firebase Authentication.';
  $('pinMessage').textContent='';
 }
-function unlock(){document.body.classList.remove('pin-locked');document.querySelector('.wrap').removeAttribute('inert');$('pinOverlay').classList.add('hidden');$('pinInput').value='';$('pinConfirm').value='';$('clientSearch').focus()}
-function lock(){document.body.classList.add('pin-locked');document.querySelector('.wrap').setAttribute('inert','');$('pinOverlay').classList.remove('hidden');$('pinInput').value='';$('pinConfirm').value='';clients=[];clientNotes={};paint();cloudAuth.signOut().catch(()=>{});showPinMode();$('pinInput').focus()}
+function unlock(){document.body.classList.remove('pin-locked');document.querySelector('.wrap').removeAttribute('inert');$('pinOverlay').classList.add('hidden');$('passwordInput').value='';$('clientSearch').focus()}
+function lock(){document.body.classList.add('pin-locked');document.querySelector('.wrap').setAttribute('inert','');$('pinOverlay').classList.remove('hidden');$('passwordInput').value='';clients=[];clientNotes={};paint();cloudAuth.signOut().catch(()=>{});showPinMode();$('pinInput').focus()}
 $('pinForm').addEventListener('submit',async e=>{
- e.preventDefault();const pin=$('pinInput').value,msg=$('pinMessage');
- if(!/^\d{4,8}$/.test(pin)){msg.textContent='Нужно ввести от 4 до 8 цифр.';return}
- const submit=$('pinSubmit');submit.disabled=true;submit.textContent='Проверяем PIN…';msg.textContent='';
+ e.preventDefault();
+ const email=$('pinInput').value.trim().toLowerCase(),password=$('passwordInput').value,msg=$('pinMessage'),submit=$('pinSubmit');
+ submit.disabled=true;submit.textContent='Входим…';msg.textContent='';
  try{
-  await cloudAuth.signOut();
-  const result=await cloudFunctions.httpsCallable('loginWithPin')({pin});
-  await cloudAuth.signInWithCustomToken(result.data.token);
+  await cloudAuth.signInWithEmailAndPassword(email,password);
   await loadCloudData();
   unlock();
  }catch(err){
   console.error(err);
-  const code=err&&err.code?String(err.code):'';
-  msg.textContent=code.includes('unauthenticated')?'Неверный PIN-код.':code.includes('not-found')?'Сервис входа ещё не развёрнут. Нужно завершить настройку Firebase Functions.':'Не удалось войти в облако. Проверь PIN и настройку Firebase.';
-  $('pinInput').value='';$('pinInput').focus();
- }finally{submit.disabled=false;submit.textContent='Открыть справочник'}
+  msg.textContent=err&&['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-email'].includes(err.code)
+    ?'Не удалось войти. Проверь почту и пароль.'
+    :err&&err.code==='permission-denied'?'У этой учётной записи нет доступа к базе. Проверь список разрешённых адресов в firestore.rules.'
+    :'Не удалось войти. Проверь, включён ли Email/Password в Firebase Authentication.';
+  $('passwordInput').value='';$('passwordInput').focus();
+ }finally{submit.disabled=false;submit.textContent='Войти'}
 });
-$('pinInput').addEventListener('input',()=>{$('pinInput').value=$('pinInput').value.replace(/\D/g,'').slice(0,8)});
-$('pinConfirm').addEventListener('input',()=>{$('pinConfirm').value=$('pinConfirm').value.replace(/\D/g,'').slice(0,8)});
+$('resetPassword').addEventListener('click',async()=>{
+ const email=$('pinInput').value.trim().toLowerCase(),msg=$('pinMessage');
+ if(!email){msg.textContent='Сначала введи электронную почту.';return}
+ try{await cloudAuth.sendPasswordResetEmail(email);msg.textContent='Если этот адрес зарегистрирован, письмо для сброса пароля отправлено.'}
+ catch(err){msg.textContent='Не удалось отправить письмо. Проверь адрес и настройки Authentication.'}
+});
 $('lockSite').addEventListener('click',lock);
 $('clientSearch').addEventListener('input',paint);
 $('clientSearch').addEventListener('focus',()=>{if(norm($('clientSearch').value))paint()});
