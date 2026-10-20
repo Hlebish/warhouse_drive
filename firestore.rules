@@ -1,16 +1,21 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isDriver() {
-      return request.auth != null && request.auth.token.driver == true;
+    // Replace these placeholders with the exact Firebase Authentication email addresses
+    // for the owner and driver before publishing these rules.
+    function isAllowedDriver() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'OWNER_EMAIL_REPLACE_ME',
+          'DRIVER_EMAIL_REPLACE_ME'
+        ];
     }
+
     match /clients/{clientId} {
-      allow read, create, update, delete: if isDriver();
+      allow read, create, update, delete: if isAllowedDriver();
     }
-    // PIN rate limits are written only by trusted Cloud Functions/Admin SDK.
-    match /pinAttempts/{attemptId} {
-      allow read, write: if false;
-    }
+
     match /{document=**} {
       allow read, write: if false;
     }
