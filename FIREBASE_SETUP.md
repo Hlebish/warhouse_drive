@@ -1,38 +1,39 @@
-# Warehouse Drive — Firebase setup
+# Warehouse Drive — Firebase Spark setup (no Cloud Functions)
 
-The client list and driver comments are stored in Cloud Firestore. The browser does not contain the shared PIN. The callable Cloud Function validates the PIN server-side and returns a Firebase custom token; Firestore rules reject unauthenticated access.
+This version uses Firebase Authentication email/password and Cloud Firestore. It does not use Cloud Functions or require the Blaze plan.
 
-## One-time setup (Windows PowerShell)
+## 1. Create the database
 
-1. In Firebase Console for project `warehousedrive-4fc42`, create a **Cloud Firestore** database. Choose **europe-west1 (Belgium)** for the database region to keep it close to users and aligned with the login function. This choice cannot be changed later. Do not enable public/test access.
-2. In **Build → Authentication**, click **Get started** if Authentication has not been initialized for this project. The app uses Firebase custom-token sign-in, so no email/password account is required.
-3. Install Node.js 20 or later and Firebase CLI: `npm install -g firebase-tools`.
-4. In the repository folder run:
+1. Open Firebase Console for project `warehousedrive-4fc42`.
+2. Create Cloud Firestore in region **europe-west1 (Belgium)**. The database region cannot be changed later.
+3. Open **Authentication → Sign-in method** and enable **Email/Password**.
 
-   ```powershell
-   firebase login
-   firebase use warehousedrive-4fc42
-   firebase functions:secrets:set DRIVER_PIN
-   ```
+## 2. Create only the approved accounts
 
-   Enter a 4–8 digit PIN when prompted. Do not put the PIN in GitHub, source code, or this file. Prefer 6–8 digits.
+In **Authentication → Users**, add the owner and driver accounts manually. Use strong, unique passwords. Do not add a public registration form to the site. Each account must verify its email address before it can access the database.
 
-5. Deploy the server function and Firestore rules:
+Send the exact email addresses for the owner and driver to whoever is editing `firestore.rules`; replace `OWNER_EMAIL_REPLACE_ME` and `DRIVER_EMAIL_REPLACE_ME` with those addresses before deploying the rules. Until replaced, the rules deliberately deny access.
 
-   ```powershell
-   cd functions
-   npm install
-   cd ..
-   firebase deploy --only functions:loginWithPin,firestore:rules
-   ```
+## 3. Deploy Firestore rules (Spark-compatible)
 
-   Cloud Functions deployment may require the Firebase project to use the Blaze (pay-as-you-go) plan and billing to be enabled. Set a budget alert in Google Cloud Billing before deployment.
+Install Firebase CLI if needed, then from the repository folder run:
 
-6. Open the GitHub Pages site, enter the PIN, then use **Загрузить базу Excel** to upload the client export. The upload goes directly to Firestore after PIN login; comments for clients that remain in the updated list are preserved.
+```powershell
+firebase.cmd login
+firebase.cmd use warehousedrive-4fc42
+firebase.cmd deploy --only firestore:rules
+```
 
-## Important
+No Functions, Cloud Build, or Blaze upgrade is required.
 
-- Never publish the Excel file, a service-account key, or the PIN in this public repository.
-- The Firebase web config in `index.html` is intended to be public. The Firestore rules and server-side function are what protect the client data.
-- The site requires the Cloud Function and Firestore rules to be deployed before PIN login can work.
-- Firebase CLI can be launched in PowerShell with `firebase.cmd` if PowerShell blocks `firebase.ps1`.
+## 4. Publish the site and upload the client Excel
+
+Merge the prepared pull request after the allowlist emails are set and the Authentication provider is enabled. Once GitHub Pages has updated, sign in using the account created in Firebase Console, then upload the Excel file through the site. Client records and driver comments are stored in Firestore and shared across authorized devices.
+
+## Security notes
+
+- Firestore rules allow only the exact verified email addresses in the allowlist.
+- The site has sign-in only; it does not offer account creation.
+- Never put the Excel data, passwords, or service-account keys in the public repository.
+- The Firebase web config is public by design; access control is enforced by Authentication and Firestore rules.
+- Keep the list of allowed emails short and remove an account from both the allowlist and Firebase Authentication if access should be revoked.
