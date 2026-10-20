@@ -226,7 +226,7 @@ async function importExcel(file){
   const wb=XLSX.read(new Uint8Array(await file.arrayBuffer()),{type:'array'}),sheet=wb.Sheets[wb.SheetNames[0]];
   if(!sheet)throw Error('В файле нет листов.');
   const matrix=XLSX.utils.sheet_to_json(sheet,{header:1,defval:'',raw:false});
-  const aliases={name:['групування','группирование','клиент','имяклиента','названиеклиента','название','фио','name','client'],phone:['телефонконтрагента','телефон','другой','мобильный','phone','mobile'],address:['фактичнаадресаконтрагента','фактичнаадреса','адресадоставки','адресдоставки','юридичнаадресаконтрагента','адрес','address'],email:['адресэлектроннойпочтыконтрагентадляобменаэлектроннымидокументами','email','e-mail','почта']};
+  const aliases={name:['групування','группирование','клиент','имяклиента','названиеклиента','название','фио','name','client'],phone:['телефонконтрагента','телефон','другой','мобильный','phone','mobile'],address:['фактичнаадресаконтрагента','фактичнаадреса','адресадоставки','адресдоставки','юридичнаадресаконтрагента','адрес','address'],email:['адресэлектроннойпочтыконтрагентадляобменаэлектроннымидокументами','адресаелектронноїпоштиконтрагентадляобмінуелектроннимидокументами','email','e-mail','почта']};
   const match=(v,f)=>aliases[f].some(a=>normHeader(v)===normHeader(a)||normHeader(v).includes(normHeader(a)));
   let header=-1;
   for(let i=0;i<Math.min(matrix.length,40);i++){const row=matrix[i]||[];if(row.some(v=>match(v,'name'))&&row.some(v=>match(v,'phone'))&&row.some(v=>match(v,'address'))){header=i;break}}
