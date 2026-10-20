@@ -4,7 +4,7 @@ The client list and driver comments are stored in Cloud Firestore. The browser d
 
 ## One-time setup (Windows PowerShell)
 
-1. In Firebase Console for project `warehousedrive-4fc42`, create a **Cloud Firestore** database. Choose a location close to your users. Do not enable public/test access.
+1. In Firebase Console for project `warehousedrive-4fc42`, create a **Cloud Firestore** database. Choose **europe-west1 (Belgium)** for the database region to keep it close to users and aligned with the login function. This choice cannot be changed later. Do not enable public/test access.
 2. In **Build → Authentication**, click **Get started** if Authentication has not been initialized for this project. The app uses Firebase custom-token sign-in, so no email/password account is required.
 3. Install Node.js 20 or later and Firebase CLI: `npm install -g firebase-tools`.
 4. In the repository folder run:
