@@ -60,6 +60,53 @@ let stops=[], editId=null;
 try{stops=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(stops))stops=[]}catch{stops=[]}
 
 const persist=()=>localStorage.setItem(KEY,JSON.stringify(stops));
+const normText=s=>String(s??'').trim().replace(/\\s+/g,' ').toLocaleLowerCase('ru').replace(/ё/g,'е');
+const paintClients=()=>{
+ const q=normText($('clientSearch').value);
+ const filtered=clientDirectory.filter(c=>normText([c.name,c.phone,c.address,c.email].join(' ')).includes(q)).slice(0,100);
+ $('clientDirectoryStatus').textContent=clientDirectory.length?'В базе '+clientDirectory.length+' клиентов. '+(q?'Найдено: '+filtered.length+'.':'Введи имя, телефон или адрес для поиска.')+(filtered.length===100?' Показаны первые 100 результатов — уточни поиск.':''):'База не загружена. Нажми «Загрузить базу Excel» и выбери файл контрагентов.';
+ $('clientList').innerHTML=filtered.map((c,i)=>'<article class="client-card"><h3>'+escapeHtml(c.name)+'</h3><div class="client-detail"><b>Телефон:</b> '+escapeHtml(c.phone||'Не указан')+'</div><div class="client-detail"><b>Адрес:</b> '+escapeHtml(c.address||'Не указан')+'</div>'+(c.email?'<div class="client-detail"><b>E-mail:</b> '+escapeHtml(c.email)+'</div>':'')+'<div class="client-actions">'+(c.phone?'<a class="btn" href="tel:'+escapeHtml(c.phone.replace(/[^+0-9]/g,''))+'">Позвонить</a>':'')+'<button class="btn primary" data-add-client="'+i+'">Добавить в маршрут</button></div></article>').join('');
+};
+const importClientExcel=async file=>{
+ if(!file)return;
+ if(!window.XLSX){$('clientDirectoryStatus').textContent='Не удалось загрузить модуль Excel. Проверь подключение к интернету.';return}
+ $('clientDirectoryStatus').textContent='Читаю файл…';
+ try{
+  const wb=XLSX.read(new Uint8Array(await file.arrayBuffer()),{type:'array'}),sheet=wb.Sheets[wb.SheetNames[0]];
+  if(!sheet)throw Error('В файле нет листов.');
+  const matrix=XLSX.utils.sheet_to_json(sheet,{header:1,defval:'',raw:false});
+  const key=s=>normText(s).replace(/[\\s_\\-./:]+/g,'');
+  const alias={name:['групування','группирование','клиент','имяклиента','названиеклиента','название','фио','name','client'],phone:['телефонконтрагента','телефон','другой','мобильный','phone','mobile'],address:['фактичнаадресаконтрагента','фактичнаадреса','адресадоставки','адресдоставки','юридичнаадресаконтрагента','адрес','address'],email:['адресэлектроннойпочтыконтрагентадляобменаэлектроннымидокументами','email','e-mail','почта']};
+  const match=(v,f)=>alias[f].some(a=>key(v)===key(a)||key(v).includes(key(a)));
+  let header=-1;
+  for(let i=0;i<Math.min(matrix.length,40);i++){const row=matrix[i]||[];if(row.some(v=>match(v,'name'))&&row.some(v=>match(v,'phone'))&&row.some(v=>match(v,'address'))){header=i;break}}
+  if(header<0)throw Error('Не найдена строка заголовков с именем, телефоном и адресом.');
+  const rows=XLSX.utils.sheet_to_json(sheet,{range:header,defval:'',raw:false}),cols=Object.keys(rows[0]||{});
+  const nameKey=cols.find(k=>match(k,'name'));
+  const phoneKeys=cols.filter(k=>match(k,'phone')).sort((a,b)=>(key(a).includes('телефонконтрагента')?0:key(a).includes('другой')?1:2)-(key(b).includes('телефонконтрагента')?0:key(b).includes('другой')?1:2));
+  const addressKeys=cols.filter(k=>match(k,'address')).sort((a,b)=>(key(a).includes('фактична')?0:key(a).includes('адресадоставки')?1:key(a).includes('юридична')?2:3)-(key(b).includes('фактична')?0:key(b).includes('адресадоставки')?1:key(b).includes('юридична')?2:3));
+  const emailKeys=cols.filter(k=>match(k,'email'));
+  const pick=(r,ks)=>{for(const k of ks){const v=String(r[k]??'').trim();if(v)return v}return ''};
+  const unique=new Map();
+  for(const row of rows){const name=String(row[nameKey]??'').trim().replace(/\\s+/g,' ');if(!name)continue;const id=normText(name),c={name,phone:pick(row,phoneKeys),address:pick(row,addressKeys),email:pick(row,emailKeys)};if(!unique.has(id))unique.set(id,c);else{const old=unique.get(id);for(const f of ['phone','address','email'])if(c[f])old[f]=c[f]}}
+  const incoming=[...unique.values()];if(!incoming.length)throw Error('В файле не найдено клиентов.');
+  if(clientDirectory.length&&!confirm('Заменить текущую базу из '+clientDirectory.length+' клиентов на новую из '+incoming.length+'?'))return;
+  clientDirectory=incoming;localStorage.setItem(CLIENT_KEY,JSON.stringify(clientDirectory));paintClients();
+  $('clientDirectoryStatus').textContent='Готово! Загружено '+clientDirectory.length+' уникальных клиентов. База сохранена на этом устройстве.';
+ }catch(err){$('clientDirectoryStatus').textContent='Не удалось загрузить файл: '+err.message}
+};
+$('clientSearch').addEventListener('input',paintClients);
+$('clientImportBtn').addEventListener('click',()=>$('clientImportFile').click());
+$('clientImportFile').addEventListener('change',e=>{importClientExcel(e.target.files[0]);e.target.value=''});
+$('clientList').addEventListener('click',e=>{
+ const b=e.target.closest('[data-add-client]');if(!b)return;
+ const q=normText($('clientSearch').value),c=clientDirectory.filter(x=>normText([x.name,x.phone,x.address,x.email].join(' ')).includes(q)).slice(0,100)[Number(b.dataset.addClient)];
+ if(!c)return;
+ $('client').value=c.name;$('address').value=c.address||'';$('note').value=c.phone?'Телефон: '+c.phone+(c.email?' · E-mail: '+c.email:''):(c.email?'E-mail: '+c.email:'');
+ $('formStatus').textContent='Данные клиента перенесены в форму. Проверь адрес и нажми «Добавить клиента».';
+ $('client').scrollIntoView({behavior:'smooth',block:'center'});$('client').focus();
+});
+
 const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const render=()=>{
  $('count').textContent=stops.length+' '+(stops.length===1?'остановка':stops.length>=2&&stops.length<=4?'остановки':'остановок');
@@ -100,6 +147,7 @@ $('export').addEventListener('click',()=>{const data={version:1,exportedAt:new D
 $('importBtn').addEventListener('click',()=>$('importFile').click());
 $('importFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());const incoming=Array.isArray(data)?data:data.stops;if(!Array.isArray(incoming))throw Error('В файле не найден список остановок.');if(!confirm('Импорт заменит текущий список остановок. Продолжить?'))return;stops=incoming.map(s=>({id:String(s.id||crypto.randomUUID()),client:String(s.client||''),address:String(s.address||''),time:String(s.time||''),note:String(s.note||'')})).filter(s=>s.client&&s.address);persist();render();$('routeStatus').textContent='Импорт завершён. Загружено остановок: '+stops.length}catch(err){alert('Не удалось импортировать файл: '+err.message)}finally{e.target.value=''}});
 render();
+paintClients();
 })();
 </script>
 </body>
