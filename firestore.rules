@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Replace these placeholders with the exact Firebase Authentication email addresses
+    // for the owner and driver before publishing these rules.
+    function isAllowedDriver() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'OWNER_EMAIL_REPLACE_ME',
+          'DRIVER_EMAIL_REPLACE_ME'
+        ];
+    }
+
+    match /clients/{clientId} {
+      allow read, create, update, delete: if isAllowedDriver();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

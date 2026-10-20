@@ -56,22 +56,28 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 body.pin-locked .wrap{visibility:hidden;pointer-events:none;user-select:none}
 @media(max-width:560px){.wrap{padding:17px 12px 38px}.search-panel{padding:15px}.search{font-size:20px;padding:15px}.client-card{padding:15px}.client-card h2{font-size:21px}.detail{font-size:18px}.toolbar{align-items:flex-start}.pin-box{padding:22px}}
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body class="pin-locked">
 <section class="pin-overlay" id="pinOverlay" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
  <div class="pin-box">
-  <div class="eyebrow">Warehouse Drive · доступ ограничен</div>
-  <h2 id="pinTitle">Введите PIN-код</h2>
-  <p id="pinDescription">PIN-код нужен, чтобы открыть справочник клиентов.</p>
+  <div class="eyebrow">Warehouse Drive · защищённый вход</div>
+  <h2 id="pinTitle">Вход в справочник</h2>
+  <p id="pinDescription">Войди с учётной записью, которую заранее создали в Firebase.</p>
   <form id="pinForm">
-   <label for="pinInput" id="pinInputLabel">PIN-код</label>
-   <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" maxlength="8" minlength="4" required placeholder="••••" aria-describedby="pinMessage">
-   <div id="pinConfirmWrap" class="hidden"><label for="pinConfirm">Повтори PIN-код</label><input id="pinConfirm" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" minlength="4" autocomplete="new-password" placeholder="••••"></div>
-   <button class="btn primary" type="submit" id="pinSubmit">Открыть справочник</button>
+   <label for="pinInput">Электронная почта</label>
+   <input id="pinInput" type="email" autocomplete="username" maxlength="254" required placeholder="name@example.com" aria-describedby="pinMessage" style="letter-spacing:normal;text-align:left;font-size:19px">
+   <label for="passwordInput">Пароль</label>
+   <input id="passwordInput" type="password" autocomplete="current-password" minlength="6" required placeholder="Пароль Firebase" style="letter-spacing:normal;text-align:left;font-size:19px">
+   <button class="btn primary" type="submit" id="pinSubmit">Войти</button>
+   <button class="btn" type="button" id="resetPassword">Забыли пароль?</button>
    <p class="pin-message" id="pinMessage" aria-live="polite"></p>
   </form>
-  <p class="pin-note">PIN защищает от случайного доступа на этом устройстве. Это не полноценная серверная авторизация.</p>
+  <p class="pin-note">Доступ разрешён только заранее добавленным адресам электронной почты. Пароль не хранится в коде сайта.</p>
  </div>
 </section>
 <main class="wrap">
@@ -96,18 +102,25 @@ body.pin-locked .wrap{visibility:hidden;pointer-events:none;user-select:none}
 <p class="footer">База хранится только в этом браузере. Чтобы загрузить её на другом устройстве, выбери файл Excel с контрагентами.</p>
 </main>
 <script>
+const firebaseConfig = {
+ apiKey: "AIzaSyDfjElqCcb-Gsh9m4nEFWmZHprOJGl1pqA",
+ authDomain: "warehousedrive-4fc42.firebaseapp.com",
+ projectId: "warehousedrive-4fc42",
+ storageBucket: "warehousedrive-4fc42.firebasestorage.app",
+ messagingSenderId: "95925903995",
+ appId: "1:95925903995:web:f19c03f83362944bd438de",
+ measurementId: "G-H7SGT9F4HT"
+};
+firebase.initializeApp(firebaseConfig);
+const cloudAuth = firebase.auth();
+const cloudDb = firebase.firestore();
+
 (()=> {
 const $=id=>document.getElementById(id);
 const CLIENT_KEY='warehouse_drive_clients_v1';
-const PIN_KEY='warehouse_drive_pin_v1';
-const PIN_ATTEMPTS_KEY='warehouse_drive_pin_attempts_v1';
 const NOTES_KEY='warehouse_drive_client_notes_v1';
 let clientNotes={};
-try{clientNotes=JSON.parse(localStorage.getItem(NOTES_KEY)||'{}');if(!clientNotes||typeof clientNotes!=='object'||Array.isArray(clientNotes))clientNotes={}}catch{clientNotes={}}
 let clients=[];
-try{clients=JSON.parse(localStorage.getItem(CLIENT_KEY)||'[]');if(!Array.isArray(clients))clients=[]}catch{clients=[]}
-let pinConfig=null;
-try{pinConfig=JSON.parse(localStorage.getItem(PIN_KEY)||'null')}catch{pinConfig=null}
 const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[^\p{L}\p{N}+@.\s-]/gu,' ').replace(/\s+/g,' ').trim();
 const digits=s=>String(s??'').replace(/\D/g,'');
 const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -154,6 +167,14 @@ function rankClients(query){
  return clients.map(c=>({client:c,score:fuzzyScore(query,c)})).filter(x=>x.score>=52).sort((a,b)=>b.score-a.score||String(a.client.name).localeCompare(String(b.client.name),'ru'));
 }
 function clientNoteKey(name){return norm(name)}
+function clientDocId(name){return encodeURIComponent(norm(name))}
+async function loadCloudData(){
+ const snap=await cloudDb.collection('clients').get();
+ clients=snap.docs.map(d=>({...d.data(),_id:d.id})).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'ru'));
+ clientNotes={};for(const c of clients){if(c.driverNote)clientNotes[clientNoteKey(c.name)]=c.driverNote;}
+ paint();
+ $('status').textContent=clients.length?'Облачная база загружена: '+clients.length+' клиентов.':'Firebase подключён, но база пока пустая. Нажми «Загрузить базу Excel».';
+}
 function clientCard(c){
  const noteKey=clientNoteKey(c.name),note=String(clientNotes[noteKey]||'');
  return '<article class="client-card"><h2>'+escapeHtml(c.name||'Без имени')+'</h2>'+
@@ -185,38 +206,42 @@ function paint(){
  suggestions.innerHTML=top.map((x,i)=>'<button class="suggestion" type="button" role="option" data-suggest="'+i+'"><strong>'+escapeHtml(x.client.name)+'</strong><span>'+escapeHtml([x.client.phone,x.client.address].filter(Boolean).join(' · ')||'Дополнительных данных нет')+'</span></button>').join('');
  suggestions.hidden=!top.length;
 }
-const PIN_ATTEMPTS={count:0,until:0};
-function bytesToHex(bytes){return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('')}
-async function pinHash(pin,salt){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pin));return bytesToHex(new Uint8Array(digest))}
-function attempts(){try{return JSON.parse(localStorage.getItem(PIN_ATTEMPTS_KEY)||'{"count":0,"until":0}')}catch{return {...PIN_ATTEMPTS}}}
-function setAttempts(a){localStorage.setItem(PIN_ATTEMPTS_KEY,JSON.stringify(a))}
-function isSetup(){return !pinConfig||!pinConfig.salt||!pinConfig.hash}
 function showPinMode(){
- const setup=isSetup();
- $('pinTitle').textContent=setup?'Создай PIN-код':'Введите PIN-код';
- $('pinDescription').textContent=setup?'Придумай код из 4–8 цифр. Он будет нужен при каждом открытии справочника на этом устройстве.':'Введи PIN-код, чтобы открыть справочник клиентов.';
- $('pinInputLabel').textContent=setup?'Новый PIN-код':'PIN-код';
- $('pinConfirmWrap').classList.toggle('hidden',!setup);
- $('pinConfirm').required=setup;
- $('pinSubmit').textContent=setup?'Сохранить PIN-код':'Открыть справочник';
+ $('pinTitle').textContent='Вход в справочник';
+ $('pinDescription').textContent='Введи свою учётную запись Firebase Authentication.';
  $('pinMessage').textContent='';
 }
-function unlock(){document.body.classList.remove('pin-locked');document.querySelector('.wrap').removeAttribute('inert');$('pinOverlay').classList.add('hidden');$('pinInput').value='';$('pinConfirm').value='';$('clientSearch').focus()}
-function lock(){document.body.classList.add('pin-locked');document.querySelector('.wrap').setAttribute('inert','');$('pinOverlay').classList.remove('hidden');$('pinInput').value='';$('pinConfirm').value='';showPinMode();$('pinInput').focus()}
+function unlock(){document.body.classList.remove('pin-locked');document.querySelector('.wrap').removeAttribute('inert');$('pinOverlay').classList.add('hidden');$('passwordInput').value='';$('clientSearch').focus()}
+function lock(){document.body.classList.add('pin-locked');document.querySelector('.wrap').setAttribute('inert','');$('pinOverlay').classList.remove('hidden');$('passwordInput').value='';clients=[];clientNotes={};paint();cloudAuth.signOut().catch(()=>{});showPinMode();$('pinInput').focus()}
 $('pinForm').addEventListener('submit',async e=>{
- e.preventDefault();const pin=$('pinInput').value,msg=$('pinMessage');
- if(!/^\d{4,8}$/.test(pin)){msg.textContent='Нужно ввести от 4 до 8 цифр.';return}
- if(isSetup()){
-  if(pin!==$('pinConfirm').value){msg.textContent='Коды не совпадают. Повтори ввод.';$('pinConfirm').focus();return}
-  try{const salt=bytesToHex(crypto.getRandomValues(new Uint8Array(16)));pinConfig={salt,hash:await pinHash(pin,salt),version:1};localStorage.setItem(PIN_KEY,JSON.stringify(pinConfig));setAttempts({count:0,until:0});unlock()}catch{msg.textContent='Не удалось сохранить PIN. Открой сайт через HTTPS и попробуй снова.'}return;
- }
- const a=attempts(),now=Date.now();
- if(a.until>now){msg.textContent='Подожди '+Math.ceil((a.until-now)/1000)+' сек. и попробуй снова.';return}
- try{if(await pinHash(pin,pinConfig.salt)===pinConfig.hash){setAttempts({count:0,until:0});unlock();return}
- const count=(a.count||0)+1,until=count>=5?now+30000:0;setAttempts({count:until?0:count,until});msg.textContent=until?'Слишком много попыток. Подожди 30 секунд.':'Неверный PIN-код. Осталось попыток до паузы: '+(5-count)+'.';$('pinInput').value='';$('pinInput').focus()}catch{msg.textContent='Не удалось проверить PIN-код. Обнови страницу.'}
+ e.preventDefault();
+ const email=$('pinInput').value.trim().toLowerCase(),password=$('passwordInput').value,msg=$('pinMessage'),submit=$('pinSubmit');
+ submit.disabled=true;submit.textContent='Входим…';msg.textContent='';
+ try{
+  const credential=await cloudAuth.signInWithEmailAndPassword(email,password);
+  if(!credential.user.emailVerified){
+   await credential.user.sendEmailVerification();
+   await cloudAuth.signOut();
+   msg.textContent='Почта ещё не подтверждена. Отправили письмо для подтверждения — открой его и перейди по ссылке, затем войди снова.';
+   return;
+  }
+  await loadCloudData();
+  unlock();
+ }catch(err){
+  console.error(err);
+  msg.textContent=err&&['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-email'].includes(err.code)
+    ?'Не удалось войти. Проверь почту и пароль.'
+    :err&&err.code==='permission-denied'?'У этой учётной записи нет доступа к базе. Проверь список разрешённых адресов в firestore.rules.'
+    :'Не удалось войти. Проверь, включён ли Email/Password в Firebase Authentication.';
+  $('passwordInput').value='';$('passwordInput').focus();
+ }finally{submit.disabled=false;submit.textContent='Войти'}
 });
-$('pinInput').addEventListener('input',()=>{$('pinInput').value=$('pinInput').value.replace(/\D/g,'').slice(0,8)});
-$('pinConfirm').addEventListener('input',()=>{$('pinConfirm').value=$('pinConfirm').value.replace(/\D/g,'').slice(0,8)});
+$('resetPassword').addEventListener('click',async()=>{
+ const email=$('pinInput').value.trim().toLowerCase(),msg=$('pinMessage');
+ if(!email){msg.textContent='Сначала введи электронную почту.';return}
+ try{await cloudAuth.sendPasswordResetEmail(email);msg.textContent='Если этот адрес зарегистрирован, письмо для сброса пароля отправлено.'}
+ catch(err){msg.textContent='Не удалось отправить письмо. Проверь адрес и настройки Authentication.'}
+});
 $('lockSite').addEventListener('click',lock);
 $('clientSearch').addEventListener('input',paint);
 $('clientSearch').addEventListener('focus',()=>{if(norm($('clientSearch').value))paint()});
@@ -236,7 +261,9 @@ $('results').addEventListener('click',async e=>{
   const value=field.value.trim();
   if(value)clientNotes[key]=value;else delete clientNotes[key];
   try{
-   localStorage.setItem(NOTES_KEY,JSON.stringify(clientNotes));
+   const client=clients.find(c=>clientNoteKey(c.name)===key);
+   if(!client||!client._id)throw new Error('Клиент не найден в облаке');
+   await cloudDb.collection('clients').doc(client._id).update({driverNote:value,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
    const status=[...$('results').querySelectorAll('.note-status')].find(el=>el.id==='note-status-'+key);
    if(status){status.textContent=value?'Комментарий сохранён':'Комментарий удалён';status.classList.add('saved')}
    save.textContent='Сохранено';
@@ -274,14 +301,24 @@ async function importExcel(file){
   const unique=new Map();
   for(const row of rows){const name=String(row[nameKey]??'').trim().replace(/\s+/g,' ');if(!name)continue;const id=norm(name),c={name,phone:pick(row,phoneKeys),address:pick(row,addressKeys),email:pick(row,emailKeys)};if(!unique.has(id))unique.set(id,c);else{const old=unique.get(id);for(const field of ['phone','address','email'])if(c[field]&&!old[field])old[field]=c[field]}}
   const incoming=[...unique.values()];if(!incoming.length)throw Error('В файле не найдено клиентов.');
-  if(clients.length&&!confirm('Заменить базу из '+clients.length+' клиентов на новую из '+incoming.length+'?'))return;
-  clients=incoming;localStorage.setItem(CLIENT_KEY,JSON.stringify(clients));$('clientSearch').value='';paint();
-  $('status').textContent='База загружена: '+clients.length+' клиентов. Теперь можно искать.';
+  if(clients.length&&!confirm('Обновить облачную базу: сейчас '+clients.length+' клиентов, в Excel '+incoming.length+'? Комментарии существующих клиентов сохранятся.'))return;
+  $('status').textContent='Загружаю '+incoming.length+' клиентов в Firebase…';
+  const col=cloudDb.collection('clients'),existing=await col.get(),wanted=new Set(incoming.map(c=>clientDocId(c.name)));
+  for(let i=0;i<incoming.length;i+=400){
+   const batch=cloudDb.batch();
+   incoming.slice(i,i+400).forEach(c=>{const id=clientDocId(c.name);batch.set(col.doc(id),{name:c.name,phone:c.phone||'',address:c.address||'',email:c.email||'',searchName:norm(c.name),searchPhone:digits(c.phone||''),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});});
+   await batch.commit();
+   $('status').textContent='Загружено в облако: '+Math.min(i+400,incoming.length)+' из '+incoming.length+'…';
+  }
+  const stale=existing.docs.filter(d=>!wanted.has(d.id));
+  for(let i=0;i<stale.length;i+=400){const batch=cloudDb.batch();stale.slice(i,i+400).forEach(d=>batch.delete(d.ref));await batch.commit();}
+  await loadCloudData();$('clientSearch').value='';paint();
+  $('status').textContent='Готово: '+clients.length+' клиентов сохранены в Firebase. База общая для всех устройств.';
  }catch(err){$('status').textContent='Не удалось загрузить файл: '+err.message}
 }
 $('importBtn').addEventListener('click',()=>$('importFile').click());
 $('importFile').addEventListener('change',e=>{const file=e.target.files[0];if(file)importExcel(file);e.target.value=''});
-paint();showPinMode();document.querySelector('.wrap').setAttribute('inert','');setTimeout(()=>$('pinInput').focus(),0);
+paint();showPinMode();document.querySelector('.wrap').setAttribute('inert','');cloudAuth.signOut().catch(()=>{});setTimeout(()=>$('pinInput').focus(),0);
 })();
 </script>
 </body>
