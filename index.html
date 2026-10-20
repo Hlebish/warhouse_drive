@@ -231,13 +231,13 @@ document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))$('su
 $('results').addEventListener('click',async e=>{
  const save=e.target.closest('[data-save-note]');
  if(save){
-  const key=save.dataset.saveNote,field=$('results').querySelector('[data-client-note="'+CSS.escape(key)+'"]');
+  const key=save.dataset.saveNote,field=[...$('results').querySelectorAll('[data-client-note]')].find(el=>el.dataset.clientNote===key);
   if(!field)return;
   const value=field.value.trim();
   if(value)clientNotes[key]=value;else delete clientNotes[key];
   try{
    localStorage.setItem(NOTES_KEY,JSON.stringify(clientNotes));
-   const status=$('results').querySelector('#note-status-'+CSS.escape(key));
+   const status=[...$('results').querySelectorAll('.note-status')].find(el=>el.id==='note-status-'+key);
    if(status){status.textContent=value?'Комментарий сохранён':'Комментарий удалён';status.classList.add('saved')}
    save.textContent='Сохранено';
    setTimeout(()=>{if(save.isConnected)save.textContent='Сохранить комментарий'},1400);
