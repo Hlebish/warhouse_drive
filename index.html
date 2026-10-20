@@ -9,14 +9,39 @@
 <title>Маршрутный лист — Warehouse Drive</title>
 <style>
 :root{font-family:Inter,Segoe UI,Arial,sans-serif;color:#17212b;background:#f3f6f8;font-synthesis:none}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1180px;margin:auto;padding:26px 18px 56px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#64748b;font-weight:800}.top h1{margin:5px 0;font-size:clamp(25px,4vw,36px);letter-spacing:-.04em}.sub{margin:0;color:#64748b}.pill{background:#e0f2e8;color:#17633c;border-radius:99px;padding:8px 12px;font-size:13px;font-weight:700}.layout{display:grid;grid-template-columns:350px 1fr;gap:18px;align-items:start}.directory{margin-bottom:18px}.directory h2{font-size:24px}.directory-tools{display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:14px}.directory-tools input{font-size:20px;padding:15px}.client-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.client-card{border:2px solid #dce5ec;border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:8px;min-width:0}.client-card h3{font-size:21px;line-height:1.25;margin:0;overflow-wrap:anywhere}.client-detail{font-size:18px;line-height:1.5;overflow-wrap:anywhere}.client-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}.client-actions .btn{font-size:17px;padding:12px}.directory-status{font-size:16px;color:#475569;line-height:1.5}.btn,.mini{min-height:44px}.panel{background:#fff;border:1px solid #e1e8ed;border-radius:18px;padding:20px;box-shadow:0 6px 24px #1b34420a}.panel h2{font-size:18px;margin:0 0 16px}.field{display:block;margin:13px 0}.field span{display:block;font-size:13px;font-weight:700;color:#475569;margin-bottom:6px}input,textarea{width:100%;padding:11px 12px;border:1px solid #d6e0e7;border-radius:10px;font:inherit;background:#fff;color:#17212b;outline:none}input:focus,textarea:focus{border-color:#2775d2;box-shadow:0 0 0 3px #2775d21a}.row{display:flex;gap:9px}.row>*{flex:1;min-width:0}.btn{border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:750;cursor:pointer;background:#eaf0f5;color:#243447}.btn:hover{filter:brightness(.97)}.primary{background:#1769d2;color:#fff}.dark{background:#17212b;color:#fff}.danger{color:#b42318;background:#fff0ee}.btn:disabled{opacity:.55;cursor:wait}.form-actions{display:flex;gap:8px;margin-top:18px}.form-actions .btn{flex:1}.settings{margin-bottom:18px}.settings-grid{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}.toolbar .spacer{flex:1}.count{font-size:13px;color:#64748b}.stops{display:flex;flex-direction:column;gap:10px}.stop{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:start;border:1px solid #e1e8ed;border-radius:13px;padding:13px}.num{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#eaf2ff;color:#1558a6;font-weight:850}.stop h3{font-size:15px;margin:1px 0 5px}.addr{font-size:13px;color:#526273;line-height:1.5;overflow-wrap:anywhere}.meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}.tag{background:#f1f5f9;border-radius:6px;padding:4px 7px;font-size:12px;color:#475569}.stop-actions{display:flex;gap:5px}.mini{border:1px solid #e0e7ed;background:#fff;border-radius:8px;padding:7px 9px;cursor:pointer}.empty{padding:42px 16px;text-align:center;color:#64748b;border:1px dashed #ccd7df;border-radius:13px}.empty strong{display:block;color:#334155;margin-bottom:6px}.notice{font-size:12px;color:#64748b;line-height:1.5;margin:12px 0 0}.status{font-size:13px;color:#526273;margin:8px 0 0;min-height:18px}.hidden{display:none!important}.footer-note{margin-top:18px;font-size:12px;color:#718096;line-height:1.6}@media(max-width:820px){.client-list{grid-template-columns:1fr}.directory-tools{grid-template-columns:1fr}.layout{grid-template-columns:1fr}.wrap{padding:18px 12px 40px}.panel{padding:16px}}@media print{body{background:#fff;color:#000}.wrap{max-width:none;padding:0}.top,.settings,.entry-panel,.toolbar,.stop-actions,.footer-note,.screen-only{display:none!important}.layout{display:block}.panel{border:0;box-shadow:none;padding:0}.route-panel h2{font-size:22px;margin-bottom:5px}.print-sub{display:block!important}.stops{gap:0}.stop{border:0;border-bottom:1px solid #bbb;border-radius:0;padding:10px 0;grid-template-columns:32px 1fr}.num{background:#fff;border:1px solid #555;color:#000;width:26px;height:26px}.stop h3{font-size:14px}.addr{font-size:12px;color:#222}.tag{background:none;border:1px solid #aaa;color:#222}.empty{display:none}.route-print-head{display:block!important;margin-bottom:14px}.route-print-head h1{font-size:22px;margin:0 0 5px}.route-print-head p{font-size:12px;margin:0 0 5px}.print-sign{display:flex;justify-content:space-between;margin-top:26px;font-size:12px}.stop{break-inside:avoid}}
+
+.pin-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:#eaf0f5}
+.pin-box{width:min(100%,440px);background:#fff;border:2px solid #d7e1e9;border-radius:22px;padding:28px;box-shadow:0 18px 70px #17212b20}
+.pin-box h1{font-size:30px;line-height:1.15;margin:0 0 12px;color:#17212b}.pin-box p{font-size:18px;line-height:1.5;color:#475569;margin:0 0 18px}
+.pin-box label{display:block;font-size:17px;font-weight:800;margin:14px 0 7px}.pin-box input{font-size:28px;letter-spacing:.25em;text-align:center;padding:15px;min-height:62px}
+.pin-box .btn{width:100%;font-size:19px;min-height:56px;margin-top:14px}.pin-message{min-height:26px;font-size:16px!important;color:#b42318!important;margin:12px 0 0!important}
+.pin-security-note{font-size:14px!important;color:#64748b!important;margin-top:16px!important}
+body.pin-locked .wrap{visibility:hidden;pointer-events:none;user-select:none}
+@media print{.pin-overlay{display:none!important}body.pin-locked .wrap{visibility:visible!important;pointer-events:auto!important}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
-<body>
+<body class="pin-locked">
+<section class="pin-overlay" id="pinOverlay" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+ <div class="pin-box">
+  <div class="eyebrow">Warehouse Drive · доступ ограничен</div>
+  <h1 id="pinTitle">Введите PIN-код</h1>
+  <p id="pinDescription">Введите PIN-код, чтобы открыть справочник клиентов и маршрутный лист.</p>
+  <form id="pinForm">
+   <label for="pinInput" id="pinInputLabel">PIN-код</label>
+   <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" maxlength="8" minlength="4" required aria-describedby="pinMessage" placeholder="••••">
+   <div id="pinConfirmWrap" class="hidden"><label for="pinConfirm">Повтори PIN-код</label><input id="pinConfirm" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" minlength="4" autocomplete="new-password" placeholder="••••"></div>
+   <button class="btn primary" type="submit" id="pinSubmit">Открыть сайт</button>
+   <p class="pin-message" id="pinMessage" aria-live="polite"></p>
+  </form>
+  <p class="pin-security-note">PIN-код нужен для защиты от случайного доступа на этом устройстве. Это не серверная авторизация.</p>
+ </div>
+</section>
 <div class="wrap">
 <header class="top">
 <div><div class="eyebrow">Warehouse Drive · локальный инструмент</div><h1>Маршрутный лист</h1><p class="sub">Собери доставки и подготовь лист для водителя.</p></div>
-<div class="pill">● Данные хранятся на этом устройстве</div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="pill">● Данные хранятся на этом устройстве</div><button class="btn dark" id="lockSite" type="button" aria-label="Заблокировать сайт">Заблокировать</button></div>
 </header>
 <section class="panel settings">
 <h2>Место выезда водителя</h2>
@@ -55,6 +80,45 @@ const KEY='warehouse_drive_routes_v1';
 const CLIENT_KEY='warehouse_drive_clients_v1';
 let clientDirectory=[];
 try{clientDirectory=JSON.parse(localStorage.getItem(CLIENT_KEY)||'[]');if(!Array.isArray(clientDirectory))clientDirectory=[]}catch{clientDirectory=[]}
+
+const PIN_KEY='warehouse_drive_pin_v1';
+const PIN_ATTEMPTS_KEY='warehouse_drive_pin_attempts_v1';
+let pinConfig=null;
+try{pinConfig=JSON.parse(localStorage.getItem(PIN_KEY)||'null')}catch{pinConfig=null}
+const pinForm=$('pinForm'),pinInput=$('pinInput'),pinConfirm=$('pinConfirm');
+const pinMessage=$('pinMessage'),pinTitle=$('pinTitle'),pinDescription=$('pinDescription');
+const pinConfirmWrap=$('pinConfirmWrap'),pinSubmit=$('pinSubmit');
+const isPinSetup=()=>!pinConfig||!pinConfig.salt||!pinConfig.hash;
+function showPinMode(){
+ const setup=isPinSetup();
+ pinTitle.textContent=setup?'Создай PIN-код':'Введите PIN-код';
+ pinDescription.textContent=setup?'Придумай код из 4–8 цифр. Он будет нужен каждый раз при открытии сайта на этом устройстве.':'Введите PIN-код, чтобы открыть справочник клиентов и маршрутный лист.';
+ $('pinInputLabel').textContent=setup?'Новый PIN-код':'PIN-код';
+ pinInput.autocomplete=setup?'new-password':'current-password';
+ pinConfirmWrap.classList.toggle('hidden',!setup);
+ pinConfirm.required=setup;
+ pinSubmit.textContent=setup?'Сохранить PIN-код':'Открыть сайт';
+ pinMessage.textContent='';
+}
+function bytesToHex(bytes){return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('')}
+async function pinHash(pin,salt){const data=new TextEncoder().encode(salt+':'+pin);const digest=await crypto.subtle.digest('SHA-256',data);return bytesToHex(new Uint8Array(digest))}
+function readPinAttempts(){try{return JSON.parse(localStorage.getItem(PIN_ATTEMPTS_KEY)||'{"count":0,"until":0}')}catch{return {count:0,until:0}}}
+function setPinAttempts(value){localStorage.setItem(PIN_ATTEMPTS_KEY,JSON.stringify(value))}
+function unlockSite(){
+ document.body.classList.remove('pin-locked');
+ $('wrap')?.removeAttribute('inert');
+ $('pinOverlay').classList.add('hidden');
+ pinInput.value='';pinConfirm.value='';
+}
+function lockSite(){
+ document.body.classList.add('pin-locked');
+ document.querySelector('.wrap').setAttribute('inert','');
+ $('pinOverlay').classList.remove('hidden');
+ showPinMode();
+ pinInput.value='';pinConfirm.value='';
+ pinInput.focus();
+}
+
 const WAREHOUSE_ADDRESS='Днепр, Богдана Хмельницкого 208Б';
 let stops=[], editId=null;
 try{stops=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(stops))stops=[]}catch{stops=[]}
@@ -115,6 +179,39 @@ const render=()=>{
  $('printWarehouse').textContent='Место выезда: '+WAREHOUSE_ADDRESS;
 };
 function resetForm(){editId=null;$('stopForm').reset();$('editId').value='';$('formTitle').textContent='Добавить остановку';$('submitBtn').textContent='Добавить клиента';$('cancelEdit').classList.add('hidden')}
+
+$('lockSite').addEventListener('click',lockSite);
+pinForm.addEventListener('submit',async e=>{
+ e.preventDefault();
+ const pin=pinInput.value;
+ if(!/^\\d{4,8}$/.test(pin)){pinMessage.textContent='PIN-код должен содержать от 4 до 8 цифр.';return}
+ if(isPinSetup()){
+  if(pin!==pinConfirm.value){pinMessage.textContent='Коды не совпадают. Повтори ввод.';pinConfirm.focus();return}
+  try{
+   const salt=bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
+   const hash=await pinHash(pin,salt);
+   pinConfig={salt,hash,version:1};
+   localStorage.setItem(PIN_KEY,JSON.stringify(pinConfig));
+   setPinAttempts({count:0,until:0});
+   unlockSite();
+  }catch(err){pinMessage.textContent='Не удалось сохранить PIN-код. Открой сайт через HTTPS и попробуй ещё раз.'}
+  return;
+ }
+ const attempts=readPinAttempts(),now=Date.now();
+ if(attempts.until>now){pinMessage.textContent='Слишком много попыток. Подожди '+Math.ceil((attempts.until-now)/1000)+' сек.';return}
+ try{
+  const hash=await pinHash(pin,pinConfig.salt);
+  if(hash===pinConfig.hash){setPinAttempts({count:0,until:0});unlockSite();return}
+  const count=(attempts.count||0)+1;
+  const until=count>=5?now+30000:0;
+  setPinAttempts({count:until?0:count,until});
+  pinMessage.textContent=until?'Пять неверных попыток. Сайт заблокирован на 30 секунд.':'Неверный PIN-код. Осталось попыток до паузы: '+(5-count)+'.';
+  pinInput.value='';pinInput.focus();
+ }catch(err){pinMessage.textContent='Не удалось проверить PIN-код. Обнови страницу и попробуй снова.'}
+});
+pinInput.addEventListener('input',()=>{pinInput.value=pinInput.value.replace(/\\D/g,'').slice(0,8)});
+pinConfirm.addEventListener('input',()=>{pinConfirm.value=pinConfirm.value.replace(/\\D/g,'').slice(0,8)});
+
 $('stopForm').addEventListener('submit',e=>{e.preventDefault();const item={id:editId||crypto.randomUUID(),client:$('client').value.trim(),address:$('address').value.trim(),time:$('time').value,note:$('note').value.trim()};if(!item.client||!item.address)return;if(editId){stops=stops.map(s=>s.id===editId?item:s)}else stops.push(item);persist();render();resetForm();$('formStatus').textContent='Сохранено на этом устройстве.'});
 $('cancelEdit').addEventListener('click',resetForm);
 $('stops').addEventListener('click',e=>{const b=e.target.closest('button[data-act]');if(!b)return;const i=stops.findIndex(s=>s.id===b.dataset.id);if(i<0)return;switch(b.dataset.act){case'edit':{const s=stops[i];editId=s.id;$('client').value=s.client;$('address').value=s.address;$('time').value=s.time||'';$('note').value=s.note||'';$('formTitle').textContent='Редактировать остановку';$('submitBtn').textContent='Сохранить изменения';$('cancelEdit').classList.remove('hidden');$('client').focus();break}case'delete':if(confirm('Удалить клиента «'+stops[i].client+'»?')){stops.splice(i,1);persist();render()}break;case'up':if(i>0){[stops[i-1],stops[i]]=[stops[i],stops[i-1]];persist();render()}break;case'down':if(i<stops.length-1){[stops[i+1],stops[i]]=[stops[i],stops[i+1]];persist();render()}break}});
@@ -148,6 +245,9 @@ $('importBtn').addEventListener('click',()=>$('importFile').click());
 $('importFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());const incoming=Array.isArray(data)?data:data.stops;if(!Array.isArray(incoming))throw Error('В файле не найден список остановок.');if(!confirm('Импорт заменит текущий список остановок. Продолжить?'))return;stops=incoming.map(s=>({id:String(s.id||crypto.randomUUID()),client:String(s.client||''),address:String(s.address||''),time:String(s.time||''),note:String(s.note||'')})).filter(s=>s.client&&s.address);persist();render();$('routeStatus').textContent='Импорт завершён. Загружено остановок: '+stops.length}catch(err){alert('Не удалось импортировать файл: '+err.message)}finally{e.target.value=''}});
 render();
 paintClients();
+showPinMode();
+document.querySelector('.wrap').setAttribute('inert','');
+setTimeout(()=>pinInput.focus(),0);
 })();
 </script>
 </body>
