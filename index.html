@@ -106,7 +106,7 @@ function readPinAttempts(){try{return JSON.parse(localStorage.getItem(PIN_ATTEMP
 function setPinAttempts(value){localStorage.setItem(PIN_ATTEMPTS_KEY,JSON.stringify(value))}
 function unlockSite(){
  document.body.classList.remove('pin-locked');
- $('wrap')?.removeAttribute('inert');
+ document.querySelector('.wrap').removeAttribute('inert');
  $('pinOverlay').classList.add('hidden');
  pinInput.value='';pinConfirm.value='';
 }
@@ -184,7 +184,7 @@ $('lockSite').addEventListener('click',lockSite);
 pinForm.addEventListener('submit',async e=>{
  e.preventDefault();
  const pin=pinInput.value;
- if(!/^\\d{4,8}$/.test(pin)){pinMessage.textContent='PIN-код должен содержать от 4 до 8 цифр.';return}
+ if(!/^\d{4,8}$/.test(pin)){pinMessage.textContent='PIN-код должен содержать от 4 до 8 цифр.';return}
  if(isPinSetup()){
   if(pin!==pinConfirm.value){pinMessage.textContent='Коды не совпадают. Повтори ввод.';pinConfirm.focus();return}
   try{
