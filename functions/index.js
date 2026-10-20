@@ -21,7 +21,7 @@ exports.loginWithPin = onCall({
   enforceAppCheck: false
 }, async (request) => {
   const pin = String(request.data && request.data.pin || '');
-  if (!/^\\d{4,8}$/.test(pin)) {
+  if (!/^\d{4,8}$/.test(pin)) {
     throw new HttpsError('invalid-argument', 'Enter a 4–8 digit PIN.');
   }
 
@@ -40,7 +40,7 @@ exports.loginWithPin = onCall({
   }
 
   const expected = DRIVER_PIN.value().trim();
-  const matches = expected.length >= 4 && expected.length <= 8 && /^\\d+$/.test(expected) &&
+  const matches = expected.length >= 4 && expected.length <= 8 && /^\d+$/.test(expected) &&
     crypto.timingSafeEqual(Buffer.from(pin.padEnd(8, '0')), Buffer.from(expected.padEnd(8, '0'))) && pin.length === expected.length;
 
   if (!matches) {
