@@ -30,6 +30,14 @@ h1{font-size:clamp(29px,5vw,42px);line-height:1.12;letter-spacing:-.035em;margin
 .detail b{color:#475569}
 .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:3px}
 .actions .btn{font-size:17px}
+.client-note{display:grid;gap:8px;margin-top:5px;padding-top:13px;border-top:1px solid #e8edf1}
+.client-note label{font-size:17px;font-weight:800}
+.client-note textarea{width:100%;min-height:94px;resize:vertical;border:2px solid #cbd8e2;border-radius:12px;padding:12px;font:inherit;font-size:17px;line-height:1.45;color:#17212b;background:#fff}
+.client-note textarea:focus{outline:none;border-color:#2775d2;box-shadow:0 0 0 3px #2775d21a}
+.note-footer{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.note-status{font-size:14px;color:#64748b;line-height:1.4}
+.note-status.saved{color:#17633c;font-weight:700}
+
 a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 .empty{background:#fff;border:1px dashed #cbd8e2;border-radius:16px;padding:26px 18px;text-align:center;color:#64748b;font-size:17px;line-height:1.5}
 .suggestions{position:absolute;z-index:10;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid #cbd8e2;border-radius:14px;box-shadow:0 12px 32px #17212b20;overflow:hidden;max-height:340px;overflow-y:auto}
@@ -93,6 +101,9 @@ const $=id=>document.getElementById(id);
 const CLIENT_KEY='warehouse_drive_clients_v1';
 const PIN_KEY='warehouse_drive_pin_v1';
 const PIN_ATTEMPTS_KEY='warehouse_drive_pin_attempts_v1';
+const NOTES_KEY='warehouse_drive_client_notes_v1';
+let clientNotes={};
+try{clientNotes=JSON.parse(localStorage.getItem(NOTES_KEY)||'{}');if(!clientNotes||typeof clientNotes!=='object'||Array.isArray(clientNotes))clientNotes={}}catch{clientNotes={}}
 let clients=[];
 try{clients=JSON.parse(localStorage.getItem(CLIENT_KEY)||'[]');if(!Array.isArray(clients))clients=[]}catch{clients=[]}
 let pinConfig=null;
@@ -142,13 +153,17 @@ function rankClients(query){
  const q=norm(query);if(!q)return [];
  return clients.map(c=>({client:c,score:fuzzyScore(query,c)})).filter(x=>x.score>=52).sort((a,b)=>b.score-a.score||String(a.client.name).localeCompare(String(b.client.name),'ru'));
 }
+function clientNoteKey(name){return norm(name)}
 function clientCard(c){
+ const noteKey=clientNoteKey(c.name),note=String(clientNotes[noteKey]||'');
  return '<article class="client-card"><h2>'+escapeHtml(c.name||'Без имени')+'</h2>'+
  '<div class="detail"><b>Телефон:</b> '+(c.phone?escapeHtml(c.phone):'Не указан')+'</div>'+
  '<div class="detail"><b>Адрес:</b> '+(c.address?escapeHtml(c.address):'Не указан')+'</div>'+
  (c.email?'<div class="detail"><b>E-mail:</b> '+escapeHtml(c.email)+'</div>':'')+
  '<div class="actions">'+(c.phone?'<a class="btn" href="tel:'+escapeHtml(c.phone.replace(/[^+0-9]/g,''))+'">Позвонить</a>':'')+
- (c.address?'<button class="btn" type="button" data-copy-address="'+escapeHtml(c.address)+'">Скопировать адрес</button>':'')+'</div></article>';
+ (c.address?'<button class="btn" type="button" data-copy-address="'+escapeHtml(c.address)+'">Скопировать адрес</button>':'')+'</div>'+
+ '<div class="client-note"><label for="note-'+escapeHtml(noteKey)+'">Комментарий водителя</label><textarea id="note-'+escapeHtml(noteKey)+'" data-client-note="'+escapeHtml(noteKey)+'" maxlength="1500" placeholder="Например: позвонить перед приездом, въезд со двора…">'+escapeHtml(note)+'</textarea>'+
+ '<div class="note-footer"><button class="btn primary" type="button" data-save-note="'+escapeHtml(noteKey)+'">Сохранить комментарий</button><span class="note-status" id="note-status-'+escapeHtml(noteKey)+'">'+(note?'Комментарий сохранён':'Пока комментария нет')+'</span></div></div></article>';
 }
 function paint(){
  const q=$('clientSearch').value;
@@ -214,6 +229,25 @@ $('suggestions').addEventListener('click',e=>{
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))$('suggestions').hidden=true});
 $('results').addEventListener('click',async e=>{
+ const save=e.target.closest('[data-save-note]');
+ if(save){
+  const key=save.dataset.saveNote,field=$('results').querySelector('[data-client-note="'+CSS.escape(key)+'"]');
+  if(!field)return;
+  const value=field.value.trim();
+  if(value)clientNotes[key]=value;else delete clientNotes[key];
+  try{
+   localStorage.setItem(NOTES_KEY,JSON.stringify(clientNotes));
+   const status=$('results').querySelector('#note-status-'+CSS.escape(key));
+   if(status){status.textContent=value?'Комментарий сохранён':'Комментарий удалён';status.classList.add('saved')}
+   save.textContent='Сохранено';
+   setTimeout(()=>{if(save.isConnected)save.textContent='Сохранить комментарий'},1400);
+  }catch(err){
+   const status=$('results').querySelector('#note-status-'+CSS.escape(key));
+   if(status)status.textContent='Не удалось сохранить. Возможно, память браузера заполнена.';
+  }
+  return;
+ }
+
  const b=e.target.closest('[data-copy-address]');if(!b)return;
  try{await navigator.clipboard.writeText(b.dataset.copyAddress);b.textContent='Адрес скопирован'}catch{const t=document.createElement('textarea');t.value=b.dataset.copyAddress;document.body.appendChild(t);t.select();const ok=document.execCommand('copy');t.remove();b.textContent=ok?'Адрес скопирован':'Не удалось скопировать'}
 });
