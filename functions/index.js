@@ -16,7 +16,7 @@ function digest(value) {
 }
 
 exports.loginWithPin = onCall({
-  region: 'us-central1',
+  region: 'europe-west1',
   secrets: [DRIVER_PIN],
   enforceAppCheck: false
 }, async (request) => {
