@@ -218,7 +218,13 @@ $('pinForm').addEventListener('submit',async e=>{
  const email=$('pinInput').value.trim().toLowerCase(),password=$('passwordInput').value,msg=$('pinMessage'),submit=$('pinSubmit');
  submit.disabled=true;submit.textContent='Входим…';msg.textContent='';
  try{
-  await cloudAuth.signInWithEmailAndPassword(email,password);
+  const credential=await cloudAuth.signInWithEmailAndPassword(email,password);
+  if(!credential.user.emailVerified){
+   await credential.user.sendEmailVerification();
+   await cloudAuth.signOut();
+   msg.textContent='Почта ещё не подтверждена. Отправили письмо для подтверждения — открой его и перейди по ссылке, затем войди снова.';
+   return;
+  }
   await loadCloudData();
   unlock();
  }catch(err){
