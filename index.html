@@ -1,288 +1,136 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#f3f6f8">
-<title>Поиск клиентов — Warehouse Drive</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f5f6f8">
+<title>Калькулятор Новой Почты</title>
 <style>
-:root{font-family:Inter,Segoe UI,Arial,sans-serif;color:#17212b;background:#f3f6f8;font-synthesis:none}
-*{box-sizing:border-box}body{margin:0}.wrap{max-width:900px;margin:0 auto;padding:24px 16px 56px}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;flex-wrap:wrap}
-.eyebrow{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:#64748b;font-weight:800}
-h1{font-size:clamp(29px,5vw,42px);line-height:1.12;letter-spacing:-.035em;margin:6px 0}
-.subtitle{font-size:18px;line-height:1.5;color:#526273;margin:0}
-.btn{border:0;border-radius:12px;padding:13px 16px;min-height:48px;font:inherit;font-weight:750;cursor:pointer;background:#e5edf4;color:#243447}
-.btn:focus-visible,.search:focus-visible,.suggestion:focus-visible{outline:3px solid #73aaf2;outline-offset:2px}
-.primary{background:#1769d2;color:#fff}.dark{background:#17212b;color:#fff}
-.search-panel{background:#fff;border:1px solid #dce5ec;border-radius:20px;padding:20px;box-shadow:0 8px 28px #1b34420a}
-.search-label{display:block;font-size:19px;font-weight:800;margin:0 0 10px}
-.search-wrap{position:relative}
-.search{width:100%;font:inherit;font-size:22px;padding:17px 18px;border:2px solid #cbd8e2;border-radius:14px;background:#fff;color:#17212b;min-height:64px}
-.search:focus{border-color:#2775d2;outline:none;box-shadow:0 0 0 4px #2775d21a}
-.hint{font-size:15px;line-height:1.5;color:#64748b;margin:10px 0 0}
-.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0 12px}
-.status{font-size:16px;color:#526273;line-height:1.5}
-.results{display:grid;gap:12px}
-.client-card{background:#fff;border:2px solid #dce5ec;border-radius:16px;padding:18px;display:grid;gap:9px;min-width:0}
-.client-card h2{font-size:23px;line-height:1.25;margin:0;overflow-wrap:anywhere}
-.detail{font-size:19px;line-height:1.5;overflow-wrap:anywhere}
-.detail b{color:#475569}
-.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:3px}
-.actions .btn{font-size:17px}
-.client-note{display:grid;gap:8px;margin-top:5px;padding-top:13px;border-top:1px solid #e8edf1}
-.client-note label{font-size:17px;font-weight:800}
-.client-note textarea{width:100%;min-height:94px;resize:vertical;border:2px solid #cbd8e2;border-radius:12px;padding:12px;font:inherit;font-size:17px;line-height:1.45;color:#17212b;background:#fff}
-.client-note textarea:focus{outline:none;border-color:#2775d2;box-shadow:0 0 0 3px #2775d21a}
-.note-footer{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.note-status{font-size:14px;color:#64748b;line-height:1.4}
-.note-status.saved{color:#17633c;font-weight:700}
-
-a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
-.empty{background:#fff;border:1px dashed #cbd8e2;border-radius:16px;padding:26px 18px;text-align:center;color:#64748b;font-size:17px;line-height:1.5}
-.suggestions{position:absolute;z-index:10;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid #cbd8e2;border-radius:14px;box-shadow:0 12px 32px #17212b20;overflow:hidden;max-height:340px;overflow-y:auto}
-.suggestions[hidden]{display:none}
-.suggestion{display:block;width:100%;text-align:left;padding:13px 15px;background:#fff;border:0;border-bottom:1px solid #edf1f4;font:inherit;cursor:pointer}
-.suggestion:last-child{border-bottom:0}.suggestion:hover,.suggestion:focus{background:#eff6ff}
-.suggestion strong{display:block;font-size:17px;line-height:1.35;color:#17212b;overflow-wrap:anywhere}
-.suggestion span{display:block;font-size:14px;color:#64748b;line-height:1.4;margin-top:3px;overflow-wrap:anywhere}
-.hidden{display:none!important}.footer{font-size:13px;line-height:1.5;color:#82909c;margin-top:22px}
-.pin-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:#eaf0f5}
-.pin-box{width:min(100%,440px);background:#fff;border:2px solid #d7e1e9;border-radius:22px;padding:28px;box-shadow:0 18px 70px #17212b20}
-.pin-box h2{font-size:30px;line-height:1.15;margin:0 0 12px}.pin-box p{font-size:17px;line-height:1.5;color:#475569;margin:0 0 18px}
-.pin-box label{display:block;font-size:17px;font-weight:800;margin:14px 0 7px}.pin-box input{width:100%;font:inherit;font-size:28px;letter-spacing:.25em;text-align:center;padding:15px;min-height:62px;border:1px solid #cbd8e2;border-radius:12px}
-.pin-box .btn{width:100%;font-size:19px;min-height:56px;margin-top:14px}.pin-message{min-height:24px;font-size:15px!important;color:#b42318!important;margin:12px 0 0!important}
-.pin-note{font-size:13px!important;color:#64748b!important;margin-top:16px!important}
-body.pin-locked .wrap{visibility:hidden;pointer-events:none;user-select:none}
-@media(max-width:560px){.wrap{padding:17px 12px 38px}.search-panel{padding:15px}.search{font-size:20px;padding:15px}.client-card{padding:15px}.client-card h2{font-size:21px}.detail{font-size:18px}.toolbar{align-items:flex-start}.pin-box{padding:22px}}
-</style>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-</head>
-<body class="pin-locked">
-<section class="pin-overlay" id="pinOverlay" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
- <div class="pin-box">
-  <div class="eyebrow">Warehouse Drive · доступ ограничен</div>
-  <h2 id="pinTitle">Введите PIN-код</h2>
-  <p id="pinDescription">PIN-код нужен, чтобы открыть справочник клиентов.</p>
-  <form id="pinForm">
-   <label for="pinInput" id="pinInputLabel">PIN-код</label>
-   <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" maxlength="8" minlength="4" required placeholder="••••" aria-describedby="pinMessage">
-   <div id="pinConfirmWrap" class="hidden"><label for="pinConfirm">Повтори PIN-код</label><input id="pinConfirm" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" minlength="4" autocomplete="new-password" placeholder="••••"></div>
-   <button class="btn primary" type="submit" id="pinSubmit">Открыть справочник</button>
-   <p class="pin-message" id="pinMessage" aria-live="polite"></p>
-  </form>
-  <p class="pin-note">PIN защищает от случайного доступа на этом устройстве. Это не полноценная серверная авторизация.</p>
- </div>
+:root{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#18212b;background:#f4f6f8;font-synthesis:none}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1080px;margin:auto;padding:28px 18px 60px}header{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:24px}.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:13px;background:#e84135;color:white;display:grid;place-items:center;font-size:24px;font-weight:900}.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#788493;font-weight:800}h1{font-size:clamp(27px,4vw,38px);letter-spacing:-.04em;margin:4px 0}.sub{margin:0;color:#687585}.stamp{font-size:13px;color:#697586;background:#fff;border:1px solid #e2e6eb;padding:9px 12px;border-radius:10px}.layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:18px;align-items:start}.panel{background:#fff;border:1px solid #e1e6eb;border-radius:18px;padding:21px;box-shadow:0 8px 26px #17212b08}.panel h2{font-size:18px;margin:0 0 16px}.field{display:grid;gap:7px;margin-bottom:15px}.field label,.field-label{font-size:13px;color:#566273;font-weight:750}.field input,.field select{width:100%;min-height:45px;border:1px solid #d8dee6;border-radius:10px;padding:10px 12px;font:inherit;color:#17212b;background:#fff}.field input:focus,.field select:focus{outline:3px solid #e8413520;border-color:#e84135}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}.type{border:1px solid #dfe4ea;background:#fff;color:#394656;border-radius:11px;padding:12px 8px;font:inherit;font-weight:750;cursor:pointer;min-height:58px}.type.active{border-color:#e84135;background:#fff5f4;color:#c62e25;box-shadow:inset 0 0 0 1px #e84135}.check{display:flex;align-items:flex-start;gap:9px;font-size:14px;color:#394656;margin:10px 0}.check input{accent-color:#e84135;width:17px;height:17px;margin:1px 0 0}.hint{font-size:12px;color:#85909c;line-height:1.5;margin:-7px 0 14px}.result{position:sticky;top:16px;background:#18212b;color:#fff;border-radius:18px;padding:22px}.result .eyebrow{color:#aeb9c6}.total{font-size:clamp(38px,5vw,52px);font-weight:850;letter-spacing:-.05em;margin:7px 0 2px}.muted{color:#aeb9c6;font-size:13px}.breakdown{border-top:1px solid #ffffff25;margin-top:18px;padding-top:13px;display:grid;gap:10px}.line{display:flex;justify-content:space-between;gap:14px;font-size:14px}.line span:first-child{color:#c1cad4}.line strong{white-space:nowrap}.warning{font-size:12px;color:#ffcf91;line-height:1.5;margin-top:14px}.hidden{display:none!important}.small{font-size:12px;color:#7d8997;line-height:1.5}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.btn{border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:750;cursor:pointer;background:#e84135;color:white}.btn.secondary{background:#eef1f4;color:#344052}.links{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;font-size:13px}.links a{color:#c7352b;text-decoration:none}.links a:hover{text-decoration:underline}.foot{margin-top:20px;color:#7c8794;font-size:12px;line-height:1.6}.divider{height:1px;background:#edf0f3;margin:17px 0}.pill{display:inline-block;padding:4px 8px;border-radius:99px;background:#f2f4f6;color:#647080;font-size:11px;font-weight:750}@media(max-width:780px){.layout{grid-template-columns:1fr}.result{position:static}.wrap{padding:18px 12px 40px}.panel{padding:17px}}@media(max-width:430px){.grid2{grid-template-columns:1fr 1fr}.types{grid-template-columns:repeat(2,1fr)}header{align-items:flex-start}.stamp{max-width:120px;text-align:center}.grid3{gap:7px}}
+</style></head>
+<body><main class="wrap">
+<header><div class="brand"><div class="logo">Н</div><div><div class="eyebrow">Warehouse tools</div><h1>Калькулятор Нової пошти</h1><p class="sub">Предварительная стоимость отправления по официальным тарифам</p></div></div><div class="stamp">Тарифы<br><b>с 10.09.2026</b></div></header>
+<div class="layout"><section class="panel">
+<h2>1. Тип отправления</h2>
+<div class="types" id="types">
+<button class="type active" data-type="parcel">Посылка до 30 кг</button><button class="type" data-type="docs">Документы</button><button class="type" data-type="cargo">Груз от 30 кг</button><button class="type" data-type="flat">Flat-бокс</button><button class="type" data-type="pallet">Палета</button><button class="type" data-type="tires">Шины / диски</button>
+</div>
+<h2>2. Маршрут и доставка</h2>
+<div class="grid2">
+<div class="field"><label for="from">Область отправления</label><select id="from"></select></div>
+<div class="field"><label for="to">Область получения</label><select id="to"></select></div>
+</div>
+<div class="grid2">
+<div class="field"><label for="delivery">Получение</label><select id="delivery"><option value="branch">Отделение</option><option value="postomat">Почтомат</option><option value="courier">Адресная доставка курьером</option></select></div>
+<div class="field"><label for="origin">Откуда отправляете</label><select id="origin"><option value="city">Город / отделение</option><option value="village">Посёлок / село</option></select></div>
+</div>
+<label class="check"><input id="destVillage" type="checkbox"> Получатель в посёлке или селе</label>
+<label class="check"><input id="local" type="checkbox"> Локальная доставка (оба населённых пункта в тарифе «Локал»)</label>
+<p class="hint">Зона между областями определяется автоматически по официальной матрице. «Локал» включайте только если оба города входят в список Новой Почты.</p>
+<div class="divider"></div>
+<h2>3. Параметры отправления</h2>
+<div id="parcelFields">
+<div class="grid2"><div class="field"><label for="weight">Фактический вес, кг</label><input id="weight" type="number" min="0.1" step="0.1" value="2"></div><div class="field"><label for="pieces">Количество мест</label><input id="pieces" type="number" min="1" step="1" value="1"></div></div>
+<div class="grid3"><div class="field"><label for="length">Длина, см</label><input id="length" type="number" min="1" value="30"></div><div class="field"><label for="width">Ширина, см</label><input id="width" type="number" min="1" value="20"></div><div class="field"><label for="height">Высота, см</label><input id="height" type="number" min="1" value="15"></div></div>
+<p class="hint" id="volumeHint">Объёмный вес = Д × Ш × В / 4000. Для тарифа берётся больший вес.</p>
+<div class="field"><label for="packing">Упаковка</label><select id="packing"><option value="none">Своя упаковка / без доплаты</option><option value="bag">Фирменный пакет 0,5–4 кг — включён</option><option value="small">Коробка малая до 2 кг — 15 грн</option><option value="medium">Коробка средняя до 10 кг — 40 грн</option><option value="large">Коробка большая до 30 кг — 80 грн</option></select></div>
+</div>
+<div id="flatFields" class="hidden">
+<div class="field"><label for="flatSize">Размер Flat-бокса</label><select id="flatSize"><option value="small">140 × 100 × 40 см</option><option value="large">180 × 150 × 40 см</option></select></div>
+<div class="field"><label for="flatWeight">Фактический вес содержимого, кг</label><input id="flatWeight" type="number" min="0" step="1" value="50"></div>
+<p class="hint">Для тарифа груза учитывается объёмный вес: 140 кг или 270 кг соответственно. Аренда Flat-бокса добавляется отдельно.</p>
+<div class="field"><label for="flatRent">Аренда Flat-бокса</label><select id="flatRent"><option value="250">До 50 кг — 250 грн</option><option value="300">До 100 кг — 300 грн</option><option value="500">До 200 кг — 500 грн</option><option value="900">До 500 кг — 900 грн</option><option value="1500">До 1000 кг — 1500 грн</option></select></div>
+</div>
+<div id="palletFields" class="hidden">
+<div class="field"><label for="palletSize">Размер палеты / предел веса</label><select id="palletSize"><option value="0">До 500 кг · до 0,49 м²</option><option value="1">До 500 кг · до 0,99 м²</option><option value="2">До 750 кг · до 1,49 м²</option><option value="3">До 1100 кг · до 2 м²</option></select></div>
+</div>
+<div id="tireFields" class="hidden">
+<div class="field"><label for="tireType">Тип шин</label><select id="tireType"><option value="0">Легковые до R17</option><option value="1">Легковые R18–23</option><option value="2">Грузовые R17,5–19,5</option><option value="3">Грузовые R20</option><option value="4">Грузовые R21–22,5</option></select></div>
+</div>
+<div class="grid2">
+<div class="field"><label for="declared">Объявленная стоимость, грн</label><input id="declared" type="number" min="0" step="1" value="500"></div>
+<div class="field"><label for="cod">Наложенный платёж, грн</label><input id="cod" type="number" min="0" step="1" value="0"></div>
+</div>
+<label class="check"><input id="oversize" type="checkbox"> Габарит более 120 см / нет фирменной коробки (если применимо)</label>
+<label class="check"><input id="returnDocs" type="checkbox"> Нужен возврат документов</label>
+<div class="small">Комиссия за объявленную стоимость и наложенный платёж рассчитывается отдельно в итоговой разбивке. Возврат отправления при отказе получателя для посылок и документов включён в тариф.</div>
+<div class="actions"><button class="btn secondary" id="reset">Сбросить</button><button class="btn" id="copy">Скопировать расчёт</button></div>
 </section>
-<main class="wrap">
-<header>
- <div><div class="eyebrow">Warehouse Drive</div><h1>Поиск клиентов</h1><p class="subtitle">Найди клиента по имени, телефону или адресу.</p></div>
- <button class="btn dark" id="lockSite" type="button">Заблокировать</button>
-</header>
-<section class="search-panel" aria-label="Поиск по базе клиентов">
- <label class="search-label" for="clientSearch">Кого ищем?</label>
- <div class="search-wrap">
-  <input class="search" id="clientSearch" type="search" autocomplete="off" placeholder="Начни вводить имя, номер или улицу…" aria-label="Поиск клиента">
-  <div class="suggestions" id="suggestions" role="listbox" aria-label="Подсказки клиентов" hidden></div>
- </div>
- <p class="hint">Можно вводить не полностью или с ошибками — покажем наиболее похожие варианты.</p>
- <div class="toolbar">
-  <div class="status" id="status" aria-live="polite">База клиентов ещё не загружена.</div>
-  <button class="btn primary" id="importBtn" type="button">Загрузить базу Excel</button>
-  <input id="importFile" type="file" accept=".xlsx,.xls" class="hidden">
- </div>
-</section>
-<section id="results" class="results" aria-live="polite"></section>
-<p class="footer">База хранится только в этом браузере. Чтобы загрузить её на другом устройстве, выбери файл Excel с контрагентами.</p>
+<aside class="result"><div class="eyebrow">Ориентировочная стоимость</div><div class="total" id="total">90 ₴</div><div class="muted" id="summary">Посылка · между отделениями · зона 2</div><div class="breakdown" id="breakdown"></div><div class="warning" id="warning"></div><div class="links"><a href="https://novaposhta.ua/shipping-cost/" target="_blank" rel="noopener">Официальные тарифы ↗</a><a href="https://novaposhta.ua/send/packaging/service/" target="_blank" rel="noopener">Упаковка ↗</a></div></aside></div>
+<p class="foot">Расчёт справочный, не является офертой Новой Почты. Тарифы могут изменяться; индивидуальные договорные условия, скидки, адресные ограничения и некоторые дополнительные услуги могут влиять на сумму. Для окончательной суммы сверяйте данные при создании ЭН в кабинете Новой Почты. Расчёт Flat-бокса использует объёмный вес как груза и отдельно учитывает аренду тары по опубликованному прайсу упаковки.</p>
 </main>
 <script>
-(()=> {
+(()=>{
 const $=id=>document.getElementById(id);
-const CLIENT_KEY='warehouse_drive_clients_v1';
-const PIN_KEY='warehouse_drive_pin_v1';
-const PIN_ATTEMPTS_KEY='warehouse_drive_pin_attempts_v1';
-const NOTES_KEY='warehouse_drive_client_notes_v1';
-let clientNotes={};
-try{clientNotes=JSON.parse(localStorage.getItem(NOTES_KEY)||'{}');if(!clientNotes||typeof clientNotes!=='object'||Array.isArray(clientNotes))clientNotes={}}catch{clientNotes={}}
-let clients=[];
-try{clients=JSON.parse(localStorage.getItem(CLIENT_KEY)||'[]');if(!Array.isArray(clients))clients=[]}catch{clients=[]}
-let pinConfig=null;
-try{pinConfig=JSON.parse(localStorage.getItem(PIN_KEY)||'null')}catch{pinConfig=null}
-const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[^\p{L}\p{N}+@.\s-]/gu,' ').replace(/\s+/g,' ').trim();
-const digits=s=>String(s??'').replace(/\D/g,'');
-const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function editDistance(a,b){
- if(a===b)return 0;if(!a)return b.length;if(!b)return a.length;
- if(Math.abs(a.length-b.length)>3)return 4;
- let prev=Array.from({length:b.length+1},(_,i)=>i);
- for(let i=1;i<=a.length;i++){let cur=[i],min=i;for(let j=1;j<=b.length;j++){const v=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));cur[j]=v;if(v<min)min=v}if(min>3)return 4;prev=cur}
- return prev[b.length]
-}
-function fuzzyScore(query,client){
- const fields=[client.name,client.phone,client.address,client.email].filter(Boolean).map(v=>norm(v));
- const q=norm(query);if(!q)return 0;
- const qDigits=digits(query);
- let best=0;
- for(let i=0;i<fields.length;i++){
-  const value=fields[i];if(!value)continue;
-  if(value===q)best=Math.max(best,130-i);
-  else if(value.startsWith(q))best=Math.max(best,115-i);
-  else if(value.includes(q))best=Math.max(best,100-i);
-  const tokens=value.split(/\s+/);
-  for(const token of tokens){
-   if(token.length<2)continue;
-   if(token.startsWith(q))best=Math.max(best,95-i);
-   else if(q.length>=3){
-    const first=token.slice(0,Math.min(token.length,q.length+1));
-    const d=editDistance(q,first);
-    const d2=editDistance(q,token.slice(0,q.length));
-    const dist=Math.min(d,d2);
-    if(dist<=Math.max(1,Math.floor(q.length/4)))best=Math.max(best,82-dist*8-i);
-    if(q.length>=5&&token.includes(q.slice(0,Math.max(3,q.length-2))))best=Math.max(best,70-i);
-   }
-  }
+const regions=['Вінницька','Волинська','Дніпропетровська','Донецька','Житомирська','Закарпатська','Запорізька','Івано-Франківська','Київська','Кіровоградська','Луганська','Львівська','Миколаївська','Одеська','Полтавська','Рівненська','Сумська','Тернопільська','Харківська','Херсонська','Хмельницька','Черкаська','Чернівецька','Чернігівська'];
+const matrix=[
+'12232222223222222212212','21332232223213331333122','23112313212322113212232','33113313321322232223233',
+'11231222123222212222121','22332123333133232323232','23112312223221323222323','22332212323133323133132',
+'22231322122222222222221','22122322212312122212122','33213322213232323232323','21332123233133331333132',
+'232223221231123222121233','232223222331123332321323','23122312123221131212213','21331232223133212133122',
+'23222323223231131212323','11322312312313313333112','23122322232113131312323','23222322133112323213232',
+'11231232223123121333112','22222323112321222222132','12332231232333231331312','22231322132322222222221'
+];
+const zone=(a,b)=>Number(matrix[a][b]||2);
+let type='parcel';
+regions.forEach((r,i)=>{for(const id of ['from','to']){const o=document.createElement('option');o.value=i;o.textContent=r;$(id).append(o)}});
+$('from').value='2';$('to').value='8';
+function val(id){return Number($(id).value)||0}
+function fmt(n){return Math.round(n*100)/100}
+function money(n){return fmt(n).toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₴'}
+function selectType(t){type=t;document.querySelectorAll('.type').forEach(b=>b.classList.toggle('active',b.dataset.type===t));$('parcelFields').classList.toggle('hidden',!['parcel','docs','cargo'].includes(t));$('flatFields').classList.toggle('hidden',t!=='flat');$('palletFields').classList.toggle('hidden',t!=='pallet');$('tireFields').classList.toggle('hidden',t!=='tires');$('weight').disabled=t==='docs';calculate()}
+document.querySelectorAll('.type').forEach(b=>b.addEventListener('click',()=>selectType(b.dataset.type)));
+function calculate(){
+ const z=zone(val('from'),val('to')),local=$('local').checked,delivery=$('delivery').value,village=$('destVillage').checked,originVillage=$('origin').value==='village';
+ const pieces=Math.max(1,Math.floor(val('pieces')||1)),dim=Math.max(val('length'),val('width'),val('height'));
+ let base=0,pack=0,extra=0,rent=0,weight=0,vol=0,desc='',notes=[],rate=0;
+ const declared=val('declared'),cod=val('cod');
+ if(type==='docs'){base=local?70:80;desc='Документы';if(delivery==='postomat')extra+=10;if(delivery==='courier')extra+=60;if(village)notes.push('Для документов доставка в село не имеет доплаты.')}
+ if(type==='parcel'){
+  weight=Math.max(val('weight'),val('length')*val('width')*val('height')/4000);
+  const cat=weight<=2?0:weight<=10?1:2;const rates=local?[70,115,180]:[90,135,200];base=rates[cat]*pieces;desc=['Малая посылка','Средняя посылка','Большая посылка'][cat];
+  if(village&&!local)extra+=30*pieces;if(delivery==='postomat')extra+=10*pieces;if(delivery==='courier')extra+=60*pieces;
+  if((dim>120||$('oversize').checked)&&weight<=30)extra+=100*pieces;
+  const p=$('packing').value;pack=({small:15,medium:40,large:80,none:0,bag:0}[p]||0)*pieces;
+  if(weight>30){notes.push('Вес больше 30 кг: выберите тип «Груз от 30 кг» для корректного тарифа.');}
+  if(weight>30)base=0;
  }
- if(qDigits.length>=3){
-  const phone=digits(client.phone||'');
-  if(phone.includes(qDigits))best=Math.max(best,120);
-  else if(qDigits.length>=5&&phone.length>=5&&editDistance(qDigits,phone.slice(0,qDigits.length))<=1)best=Math.max(best,80);
+ if(type==='cargo'||type==='flat'){
+  if(type==='flat'){const dims=$('flatSize').value==='small'?[140,100,40]:[180,150,40];vol=dims[0]*dims[1]*dims[2]/4000;weight=Math.max(val('flatWeight'),vol);rent=val('flatRent');}
+  else {weight=Math.max(val('weight'),val('length')*val('width')*val('height')/4000);}
+  const kg=Math.ceil(weight);rate=local?8:([0,12,13,16][z]||13);base=kg*rate*pieces;desc=type==='flat'?'Flat-бокс':'Груз > 30 кг';
+  if(village&&!local)extra+=3*kg*pieces;if(delivery==='courier')extra+=Math.ceil((kg*pieces)/100)*200;
+  if(dim>120||type==='flat'||$('oversize').checked)extra+=150*pieces;
+  if(weight<=30)notes.push('Для отправления до 30 кг используйте категорию «Посылка».');
+  if(weight>1000)notes.push('Максимальный допустимый вес груза — 1000 кг.');
  }
- return best;
-}
-function rankClients(query){
- const q=norm(query);if(!q)return [];
- return clients.map(c=>({client:c,score:fuzzyScore(query,c)})).filter(x=>x.score>=52).sort((a,b)=>b.score-a.score||String(a.client.name).localeCompare(String(b.client.name),'ru'));
-}
-function clientNoteKey(name){return norm(name)}
-function clientCard(c){
- const noteKey=clientNoteKey(c.name),note=String(clientNotes[noteKey]||'');
- return '<article class="client-card"><h2>'+escapeHtml(c.name||'Без имени')+'</h2>'+
- '<div class="detail"><b>Телефон:</b> '+(c.phone?escapeHtml(c.phone):'Не указан')+'</div>'+
- '<div class="detail"><b>Адрес:</b> '+(c.address?escapeHtml(c.address):'Не указан')+'</div>'+
- (c.email?'<div class="detail"><b>E-mail:</b> '+escapeHtml(c.email)+'</div>':'')+
- '<div class="actions">'+(c.phone?'<a class="btn" href="tel:'+escapeHtml(c.phone.replace(/[^+0-9]/g,''))+'">Позвонить</a>':'')+
- (c.address?'<button class="btn" type="button" data-copy-address="'+escapeHtml(c.address)+'">Скопировать адрес</button>':'')+'</div>'+
- '<div class="client-note"><label for="note-'+escapeHtml(noteKey)+'">Комментарий водителя</label><textarea id="note-'+escapeHtml(noteKey)+'" data-client-note="'+escapeHtml(noteKey)+'" maxlength="1500" placeholder="Например: позвонить перед приездом, въезд со двора…">'+escapeHtml(note)+'</textarea>'+
- '<div class="note-footer"><button class="btn primary" type="button" data-save-note="'+escapeHtml(noteKey)+'">Сохранить комментарий</button><span class="note-status" id="note-status-'+escapeHtml(noteKey)+'">'+(note?'Комментарий сохранён':'Пока комментария нет')+'</span></div></div></article>';
-}
-function paint(){
- const q=$('clientSearch').value;
- const ranked=rankClients(q);
- const results=$('results');
- if(!clients.length){
-  $('status').textContent='База не загружена. Нажми «Загрузить базу Excel».';
-  results.innerHTML='<div class="empty">Выбери Excel-файл со справочником клиентов, чтобы начать поиск.</div>';
-  $('suggestions').hidden=true;return;
+ if(type==='pallet'){
+  const idx=val('palletSize'),prices=local?[950,1450,2200,2800]:[[1200,2250,3250,4250],[1350,2550,3700,4900],[1600,2950,4250,5600]][z-1]||[1200,2250,3250,4250];
+  base=prices[idx];desc='Палета';if(village&&!local)extra+=150;if(delivery==='courier')extra+=200;
  }
- if(!norm(q)){
-  $('status').textContent='В базе '+clients.length+' клиентов. Начни вводить данные для поиска.';
-  results.innerHTML='<div class="empty">Начни вводить имя, телефон или адрес. Подсказки появятся автоматически.</div>';
-  $('suggestions').hidden=true;return;
+ if(type==='tires'){
+  const idx=val('tireType'),table=local?[150,180,220,310,280]:[[160,190,250,380,350],[180,200,300,470,420],[190,210,350,540,490]][z-1]||[160,190,250,380,350];
+  base=table[idx]*pieces;desc='Шины / диски';if(village&&!local)extra+=(idx<2?35:50)*pieces;if(delivery==='courier')extra+=(idx<2?60:200)*pieces;
  }
- $('status').textContent=ranked.length?'Найдено похожих клиентов: '+ranked.length+'.':'Совпадений пока нет. Попробуй ввести другую часть имени, телефона или адреса.';
- results.innerHTML=ranked.length?ranked.slice(0,40).map(x=>clientCard(x.client)).join(''):'<div class="empty">Не нашли похожих клиентов. Попробуй меньше букв или часть номера телефона.</div>';
- const suggestions=$('suggestions'),top=ranked.slice(0,7);
- suggestions.innerHTML=top.map((x,i)=>'<button class="suggestion" type="button" role="option" data-suggest="'+i+'"><strong>'+escapeHtml(x.client.name)+'</strong><span>'+escapeHtml([x.client.phone,x.client.address].filter(Boolean).join(' · ')||'Дополнительных данных нет')+'</span></button>').join('');
- suggestions.hidden=!top.length;
+ let insurance=0;if(declared>500){insurance=declared*(type==='cargo'||type==='flat'||type==='tires'?0.0075:0.005);}
+ let codFee=0;if(cod>0)codFee=cod*0.02+20;
+ const total=base+pack+rent+extra+insurance+codFee;
+ const rows=[['Доставка',base],['Упаковка',pack],['Аренда Flat-бокса',rent],['Дополнительные услуги',extra],['Комиссия за объявленную стоимость',insurance],['Наложенный платёж (2% + 20 грн)',codFee]].filter(x=>x[1]>0);
+ $('total').textContent=money(total);
+ $('summary').textContent=desc+' · '+(local?'Локал':('тарифная зона '+z))+' · '+(delivery==='branch'?'отделение':delivery==='postomat'?'почтомат':'курьер');
+ $('breakdown').innerHTML=rows.map(([k,v])=>'<div class="line"><span>'+k+'</span><strong>'+money(v)+'</strong></div>').join('')+'<div class="line" style="border-top:1px solid #ffffff25;padding-top:10px"><span>Итого</span><strong>'+money(total)+'</strong></div>';
+ if(type==='parcel'||type==='docs'){if(delivery==='courier')notes.push('Курьерская услуга +60 грн за место.');if(delivery==='postomat')notes.push('Почтомат: +10 грн за место.');}
+ if(type==='flat')notes.push('Flat-бокс: объёмный вес '+fmt(vol)+' кг; аренда '+money(rent)+'.');
+ if(type==='cargo')notes.push('Вес для тарифа: '+fmt(weight)+' кг; ставка '+rate+' грн/кг.');
+ if(type==='parcel'&&weight>30)notes.push('Расчёт доставки обнулён, так как вес превышает лимит посылки до 30 кг.');
+ if(type==='parcel'&&weight>0&&weight<=30&&$('packing').value==='bag'&&(weight<0.5||weight>4))notes.push('Фирменный пакет включён при весе 0,5–4 кг; проверьте допустимость упаковки.');
+ if(type==='pallet')notes.push('Тариф палеты зависит от площади и тарифной зоны.');
+ if($('returnDocs').checked)notes.push('Возврат документов не включён: стоимость зависит от действующего прайс-листа дополнительных услуг.');
+ $('warning').textContent=notes.join(' ');
+ window.lastCalculation={total,rows,summary:$('summary').textContent,notes};
 }
-const PIN_ATTEMPTS={count:0,until:0};
-function bytesToHex(bytes){return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('')}
-async function pinHash(pin,salt){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pin));return bytesToHex(new Uint8Array(digest))}
-function attempts(){try{return JSON.parse(localStorage.getItem(PIN_ATTEMPTS_KEY)||'{"count":0,"until":0}')}catch{return {...PIN_ATTEMPTS}}}
-function setAttempts(a){localStorage.setItem(PIN_ATTEMPTS_KEY,JSON.stringify(a))}
-function isSetup(){return !pinConfig||!pinConfig.salt||!pinConfig.hash}
-function showPinMode(){
- const setup=isSetup();
- $('pinTitle').textContent=setup?'Создай PIN-код':'Введите PIN-код';
- $('pinDescription').textContent=setup?'Придумай код из 4–8 цифр. Он будет нужен при каждом открытии справочника на этом устройстве.':'Введи PIN-код, чтобы открыть справочник клиентов.';
- $('pinInputLabel').textContent=setup?'Новый PIN-код':'PIN-код';
- $('pinConfirmWrap').classList.toggle('hidden',!setup);
- $('pinConfirm').required=setup;
- $('pinSubmit').textContent=setup?'Сохранить PIN-код':'Открыть справочник';
- $('pinMessage').textContent='';
-}
-function unlock(){document.body.classList.remove('pin-locked');document.querySelector('.wrap').removeAttribute('inert');$('pinOverlay').classList.add('hidden');$('pinInput').value='';$('pinConfirm').value='';$('clientSearch').focus()}
-function lock(){document.body.classList.add('pin-locked');document.querySelector('.wrap').setAttribute('inert','');$('pinOverlay').classList.remove('hidden');$('pinInput').value='';$('pinConfirm').value='';showPinMode();$('pinInput').focus()}
-$('pinForm').addEventListener('submit',async e=>{
- e.preventDefault();const pin=$('pinInput').value,msg=$('pinMessage');
- if(!/^\d{4,8}$/.test(pin)){msg.textContent='Нужно ввести от 4 до 8 цифр.';return}
- if(isSetup()){
-  if(pin!==$('pinConfirm').value){msg.textContent='Коды не совпадают. Повтори ввод.';$('pinConfirm').focus();return}
-  try{const salt=bytesToHex(crypto.getRandomValues(new Uint8Array(16)));pinConfig={salt,hash:await pinHash(pin,salt),version:1};localStorage.setItem(PIN_KEY,JSON.stringify(pinConfig));setAttempts({count:0,until:0});unlock()}catch{msg.textContent='Не удалось сохранить PIN. Открой сайт через HTTPS и попробуй снова.'}return;
- }
- const a=attempts(),now=Date.now();
- if(a.until>now){msg.textContent='Подожди '+Math.ceil((a.until-now)/1000)+' сек. и попробуй снова.';return}
- try{if(await pinHash(pin,pinConfig.salt)===pinConfig.hash){setAttempts({count:0,until:0});unlock();return}
- const count=(a.count||0)+1,until=count>=5?now+30000:0;setAttempts({count:until?0:count,until});msg.textContent=until?'Слишком много попыток. Подожди 30 секунд.':'Неверный PIN-код. Осталось попыток до паузы: '+(5-count)+'.';$('pinInput').value='';$('pinInput').focus()}catch{msg.textContent='Не удалось проверить PIN-код. Обнови страницу.'}
-});
-$('pinInput').addEventListener('input',()=>{$('pinInput').value=$('pinInput').value.replace(/\D/g,'').slice(0,8)});
-$('pinConfirm').addEventListener('input',()=>{$('pinConfirm').value=$('pinConfirm').value.replace(/\D/g,'').slice(0,8)});
-$('lockSite').addEventListener('click',lock);
-$('clientSearch').addEventListener('input',paint);
-$('clientSearch').addEventListener('focus',()=>{if(norm($('clientSearch').value))paint()});
-$('suggestions').addEventListener('click',e=>{
- const b=e.target.closest('[data-suggest]');if(!b)return;
- const ranked=rankClients($('clientSearch').value),selected=ranked[Number(b.dataset.suggest)]?.client;if(!selected)return;
- $('clientSearch').value=selected.name;$('suggestions').hidden=true;paint();
- const card=[...$('results').querySelectorAll('.client-card')].find(el=>el.querySelector('h2')?.textContent===selected.name);
- if(card)card.scrollIntoView({behavior:'smooth',block:'nearest'});
-});
-document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))$('suggestions').hidden=true});
-$('results').addEventListener('click',async e=>{
- const save=e.target.closest('[data-save-note]');
- if(save){
-  const key=save.dataset.saveNote,field=[...$('results').querySelectorAll('[data-client-note]')].find(el=>el.dataset.clientNote===key);
-  if(!field)return;
-  const value=field.value.trim();
-  if(value)clientNotes[key]=value;else delete clientNotes[key];
-  try{
-   localStorage.setItem(NOTES_KEY,JSON.stringify(clientNotes));
-   const status=[...$('results').querySelectorAll('.note-status')].find(el=>el.id==='note-status-'+key);
-   if(status){status.textContent=value?'Комментарий сохранён':'Комментарий удалён';status.classList.add('saved')}
-   save.textContent='Сохранено';
-   setTimeout(()=>{if(save.isConnected)save.textContent='Сохранить комментарий'},1400);
-  }catch(err){
-   const status=$('results').querySelector('#note-status-'+CSS.escape(key));
-   if(status)status.textContent='Не удалось сохранить. Возможно, память браузера заполнена.';
-  }
-  return;
- }
-
- const b=e.target.closest('[data-copy-address]');if(!b)return;
- try{await navigator.clipboard.writeText(b.dataset.copyAddress);b.textContent='Адрес скопирован'}catch{const t=document.createElement('textarea');t.value=b.dataset.copyAddress;document.body.appendChild(t);t.select();const ok=document.execCommand('copy');t.remove();b.textContent=ok?'Адрес скопирован':'Не удалось скопировать'}
-});
-function normHeader(s){return norm(s).replace(/[\s_\-./:]+/g,'')}
-async function importExcel(file){
- if(!file)return;
- if(!window.XLSX){$('status').textContent='Модуль Excel не загрузился. Проверь интернет-соединение.';return}
- $('status').textContent='Читаю Excel-файл…';
- try{
-  const wb=XLSX.read(new Uint8Array(await file.arrayBuffer()),{type:'array'}),sheet=wb.Sheets[wb.SheetNames[0]];
-  if(!sheet)throw Error('В файле нет листов.');
-  const matrix=XLSX.utils.sheet_to_json(sheet,{header:1,defval:'',raw:false});
-  const aliases={name:['групування','группирование','клиент','имяклиента','названиеклиента','название','фио','name','client'],phone:['телефонконтрагента','телефон','другой','мобильный','phone','mobile'],address:['фактичнаадресаконтрагента','фактичнаадреса','адресадоставки','адресдоставки','юридичнаадресаконтрагента','адрес','address'],email:['адресэлектроннойпочтыконтрагентадляобменаэлектроннымидокументами','адресаелектронноїпоштиконтрагентадляобмінуелектроннимидокументами','email','e-mail','почта']};
-  const match=(v,f)=>aliases[f].some(a=>normHeader(v)===normHeader(a)||normHeader(v).includes(normHeader(a)));
-  let header=-1;
-  for(let i=0;i<Math.min(matrix.length,40);i++){const row=matrix[i]||[];if(row.some(v=>match(v,'name'))&&row.some(v=>match(v,'phone'))&&row.some(v=>match(v,'address'))){header=i;break}}
-  if(header<0)throw Error('Не найдена строка заголовков с именем, телефоном и адресом.');
-  const rows=XLSX.utils.sheet_to_json(sheet,{range:header,defval:'',raw:false}),cols=Object.keys(rows[0]||{});
-  const nameKey=cols.find(k=>match(k,'name'));
-  const phoneKeys=cols.filter(k=>match(k,'phone')).sort((a,b)=>(normHeader(a).includes('телефонконтрагента')?0:normHeader(a).includes('другой')?1:2)-(normHeader(b).includes('телефонконтрагента')?0:normHeader(b).includes('другой')?1:2));
-  const addressKeys=cols.filter(k=>match(k,'address')).sort((a,b)=>(normHeader(a).includes('фактична')?0:normHeader(a).includes('адресадоставки')?1:normHeader(a).includes('юридична')?2:3)-(normHeader(b).includes('фактична')?0:normHeader(b).includes('адресадоставки')?1:normHeader(b).includes('юридична')?2:3));
-  const emailKeys=cols.filter(k=>match(k,'email'));
-  const pick=(r,ks)=>{for(const k of ks){const v=String(r[k]??'').trim();if(v)return v}return ''};
-  const unique=new Map();
-  for(const row of rows){const name=String(row[nameKey]??'').trim().replace(/\s+/g,' ');if(!name)continue;const id=norm(name),c={name,phone:pick(row,phoneKeys),address:pick(row,addressKeys),email:pick(row,emailKeys)};if(!unique.has(id))unique.set(id,c);else{const old=unique.get(id);for(const field of ['phone','address','email'])if(c[field]&&!old[field])old[field]=c[field]}}
-  const incoming=[...unique.values()];if(!incoming.length)throw Error('В файле не найдено клиентов.');
-  if(clients.length&&!confirm('Заменить базу из '+clients.length+' клиентов на новую из '+incoming.length+'?'))return;
-  clients=incoming;localStorage.setItem(CLIENT_KEY,JSON.stringify(clients));$('clientSearch').value='';paint();
-  $('status').textContent='База загружена: '+clients.length+' клиентов. Теперь можно искать.';
- }catch(err){$('status').textContent='Не удалось загрузить файл: '+err.message}
-}
-$('importBtn').addEventListener('click',()=>$('importFile').click());
-$('importFile').addEventListener('change',e=>{const file=e.target.files[0];if(file)importExcel(file);e.target.value=''});
-paint();showPinMode();document.querySelector('.wrap').setAttribute('inert','');setTimeout(()=>$('pinInput').focus(),0);
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',calculate));
+$('reset').addEventListener('click',()=>{location.reload()});
+$('copy').addEventListener('click',async()=>{const c=window.lastCalculation;const text='Новая Почта — '+c.summary+'\n'+c.rows.map(r=>r[0]+': '+money(r[1])).join('\n')+'\nИтого: '+money(c.total)+(c.notes.length?'\nПримечания: '+c.notes.join(' '):'');try{await navigator.clipboard.writeText(text);$('copy').textContent='Скопировано'}catch{$('copy').textContent='Не удалось скопировать'}setTimeout(()=>$('copy').textContent='Скопировать расчёт',1600)});
+calculate();
 })();
-</script>
-</body>
-</html>
+</script></body></html>
