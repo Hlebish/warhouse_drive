@@ -49,11 +49,10 @@
 </div>
 <div class="field"><label for="codPay">Оплата наложенного платежа</label><select id="codPay"><option value="other">Другой способ — 2% + 20 грн</option><option value="novapay">NovaPay / Новая Почта — 1% + 10 грн</option></select></div>
 <label class="check"><input id="oversize" type="checkbox"> Габарит более 120 см / нет фирменной коробки (если применимо)</label>
-<label class="check"><input id="returnDocs" type="checkbox"> Нужен возврат документов</label>
 <div class="small">Комиссия за объявленную стоимость и наложенный платёж рассчитывается отдельно в итоговой разбивке. Возврат отправления при отказе получателя для посылок и документов включён в тариф.</div>
 <div class="actions"><button class="btn secondary" id="reset">Сбросить</button><button class="btn" id="copy">Скопировать расчёт</button></div>
 </section>
-<aside class="result"><div class="eyebrow">Ориентировочная стоимость</div><div class="total" id="total">90 ₴</div><div class="muted" id="summary">Посылка · между отделениями · зона 2</div><div class="breakdown" id="breakdown"></div><div class="warning" id="warning"></div><div class="links"><a href="https://novaposhta.ua/shipping-cost/" target="_blank" rel="noopener">Официальные тарифы ↗</a><a href="https://site-assets.novapost.com/98568fc9-fb51-4d37-9387-c88574f747b7.pdf" target="_blank" rel="noopener">Матрица зон ↗</a><a href="https://novaposhta.ua/send/packaging/service/" target="_blank" rel="noopener">Упаковка ↗</a></div></aside></div>
+<aside class="result"><div class="eyebrow">Ориентировочная стоимость</div><div class="total" id="total">90 ₴</div><div class="muted" id="summary">Посылка · между отделениями · зона 2</div><div class="breakdown" id="breakdown"></div><div class="warning" id="warning"></div><div class="links"><a href="https://novaposhta.ua/shipping-cost/" target="_blank" rel="noopener">Официальные тарифы ↗</a><a href="https://site-assets.novapost.com/eac8e459-fde4-4ed2-a801-0aeb04e7e947.pdf" target="_blank" rel="noopener">Тарифный PDF ↗</a><a href="https://site-assets.novapost.com/98568fc9-fb51-4d37-9387-c88574f747b7.pdf" target="_blank" rel="noopener">Матрица зон ↗</a><a href="https://novaposhta.ua/send/packaging/service/" target="_blank" rel="noopener">Упаковка ↗</a></div></aside></div>
 <p class="foot">Расчёт справочный, не является офертой Новой Почты. Тарифы могут изменяться; индивидуальные договорные условия, скидки, адресные ограничения и некоторые дополнительные услуги могут влиять на сумму. Для окончательной суммы сверяйте данные при создании ЭН в кабинете Новой Почты. Расчёт Flat-бокса использует объёмный вес как груза и отдельно учитывает аренду тары по опубликованному прайсу упаковки.</p>
 </main>
 <script>
@@ -110,7 +109,6 @@ function calculate(){
  if(type==='parcel'&&weight>30)notes.push('Расчёт доставки обнулён, так как вес превышает лимит посылки до 30 кг.');
  if(type==='parcel'&&weight>0&&weight<=30&&$('packing').value==='bag'&&(weight<0.5||weight>4))notes.push('Фирменный пакет включён при весе 0,5–4 кг; проверьте допустимость упаковки.');
  if(type==='pallet')notes.push('Тариф палеты зависит от площади и тарифной зоны.');
- if($('returnDocs').checked)notes.push('Возврат документов не включён: стоимость зависит от действующего прайс-листа дополнительных услуг.');
  $('warning').textContent=notes.join(' ');
  window.lastCalculation={total,rows,summary:$('summary').textContent,notes};
 }
