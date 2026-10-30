@@ -47,6 +47,7 @@
 <div class="field"><label for="declared">Объявленная стоимость, грн</label><input id="declared" type="number" min="0" step="1" value="500"></div>
 <div class="field"><label for="cod">Наложенный платёж, грн</label><input id="cod" type="number" min="0" step="1" value="0"></div>
 </div>
+<div class="field"><label for="codPay">Оплата наложенного платежа</label><select id="codPay"><option value="other">Другой способ — 2% + 20 грн</option><option value="novapay">NovaPay / Новая Почта — 1% + 10 грн</option></select></div>
 <label class="check"><input id="oversize" type="checkbox"> Габарит более 120 см / нет фирменной коробки (если применимо)</label>
 <label class="check"><input id="returnDocs" type="checkbox"> Нужен возврат документов</label>
 <div class="small">Комиссия за объявленную стоимость и наложенный платёж рассчитывается отдельно в итоговой разбивке. Возврат отправления при отказе получателя для посылок и документов включён в тариф.</div>
@@ -97,9 +98,9 @@ function calculate(){
   base=table[idx]*pieces;desc='Шины / диски';if(village&&!local)extra+=(idx<2?35:50)*pieces;if(delivery==='courier')extra+=(idx<2?60:200)*pieces;
  }
  let insurance=0;if(declared>500){insurance=declared*(type==='cargo'||type==='flat'||type==='tires'?0.0075:0.005);}
- let codFee=0;if(cod>0)codFee=cod*0.02+20;
+ let codFee=0;if(cod>0)codFee=$('codPay').value==='novapay'?cod*0.01+10:cod*0.02+20;
  const total=base+pack+rent+extra+insurance+codFee;
- const rows=[['Доставка',base],['Упаковка',pack],['Аренда Flat-бокса',rent],['Дополнительные услуги',extra],['Комиссия за объявленную стоимость',insurance],['Наложенный платёж (2% + 20 грн)',codFee]].filter(x=>x[1]>0);
+ const rows=[['Доставка',base],['Упаковка',pack],['Аренда Flat-бокса',rent],['Дополнительные услуги',extra],['Комиссия за объявленную стоимость',insurance],['Комиссия наложенного платежа',codFee]].filter(x=>x[1]>0);
  $('total').textContent=money(total);
  $('summary').textContent=desc+' · '+(local?'Локал':('тарифная зона '+z))+' · '+(delivery==='branch'?'отделение':delivery==='postomat'?'почтомат':'курьер');
  $('breakdown').innerHTML=rows.map(([k,v])=>'<div class="line"><span>'+k+'</span><strong>'+money(v)+'</strong></div>').join('')+'<div class="line" style="border-top:1px solid #ffffff25;padding-top:10px"><span>Итого</span><strong>'+money(total)+'</strong></div>';
