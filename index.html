@@ -63,7 +63,7 @@ let type='parcel';const tierIndex=w=>tiers.findIndex(t=>w<=t),zone=()=>zoneMatri
 function selectType(t){type=t;document.querySelectorAll('.type').forEach(b=>b.classList.toggle('active',b.dataset.type===t));$('parcelFields').classList.toggle('hidden',!['parcel','docs','cargo'].includes(t));$('flatFields').classList.toggle('hidden',t!=='flat');$('palletFields').classList.toggle('hidden',t!=='pallet');$('tireFields').classList.toggle('hidden',t!=='tires');$('weight').disabled=t==='docs';if(t==='flat')$('cargoPack').value='flat';if(t==='pallet')$('cargoPack').value='palletBoard';calculate()}
 document.querySelectorAll('.type').forEach(b=>b.addEventListener('click',()=>selectType(b.dataset.type)));
 function calculate(){
- const z=zone(),local=$('local').checked,delivery=$('delivery').value,village=$('destVillage').checked,pieces=Math.max(1,Math.floor(n('pieces')||1)),dims=[n('length'),n('width'),n('height')],dim=Math.max(...dims),vol=dims.reduce((a,b)=>a*b,1)/4000;
+ const z=zone(),local=$('local').checked,delivery=$('delivery').value,village=$('destVillage').checked,pieces=Math.max(1,Math.floor(n('pieces')||1)),dims=[type==='flat'?140:n('length'),type==='flat'?100:n('width'),type==='flat'?40:n('height')],dim=Math.max(...dims),vol=dims.reduce((a,b)=>a*b,1)/4000;
  let base=0,packCost=0,extra=0,rent=0,weight=0,desc='',notes=[],rate=0;
  const from=regions[n('fromRegion')],to=regions[n('toRegion')],declared=n('declared'),cod=n('cod');
  $('zoneInfo').textContent='Маршрут: '+from+' → '+to+' · '+(local?'Локальный тариф выбран вручную':'тарифная зона '+z+' по официальной матрице');
